@@ -1,0 +1,114 @@
+﻿/* The classic theme is unchanged; this stylesheet scopes the alternate room. */
+.theme-toggle{margin-left:auto;font-size:13px;white-space:nowrap;padding:9px 14px;border-radius:30px}
+html[data-theme="aristocrat"]{color-scheme:dark;--bg:#160f0b;--ink:#f2e5cd;--green:#d5ab62;--muted:#c0ab8c;--line:#79593470;background:#160f0b}
+html[data-theme="aristocrat"] body{background:transparent;min-height:100svh}
+html[data-theme="aristocrat"] body:before{content:'';position:fixed;inset:0;z-index:-2;background:linear-gradient(90deg,#0c0908d9,#110b08a6 60%,#160d0866),url('../assets/aristocrat-study.png') center/cover no-repeat;pointer-events:none}
+html[data-theme="aristocrat"] body:after{content:'';position:fixed;inset:0;z-index:-1;pointer-events:none;background:radial-gradient(ellipse at 95% 55%,#ed8d1822,transparent 60%);animation:firelight 6s ease-in-out infinite alternate}
+html[data-theme="aristocrat"] header{border-bottom:1px solid #b689484d;padding-top:22px;padding-bottom:22px}
+html[data-theme="aristocrat"] .brand{font-family:Georgia,'Times New Roman',serif;letter-spacing:.3px;color:#f4dfb6}
+html[data-theme="aristocrat"] h1,html[data-theme="aristocrat"] h2,html[data-theme="aristocrat"] h3{font-family:Georgia,'Times New Roman',serif;font-weight:500;color:#f6e6ca}
+html[data-theme="aristocrat"] h1{letter-spacing:-1.3px;text-shadow:0 3px 22px #0009}
+html[data-theme="aristocrat"] .eyebrow{color:#d0a366;letter-spacing:3px}
+html[data-theme="aristocrat"] button,html[data-theme="aristocrat"] .button,html[data-theme="aristocrat"] select{background:linear-gradient(145deg,#38291d,#21180f);color:#edd6af;border:1px solid #8b673c;border-radius:7px;box-shadow:inset 0 1px #e0b36c20,0 3px 8px #0003}
+html[data-theme="aristocrat"] button:not(.square):hover,html[data-theme="aristocrat"] .button:hover{background:linear-gradient(145deg,#594024,#332116);border-color:#d2ab69;box-shadow:0 5px 18px #0004}
+html[data-theme="aristocrat"] .primary{background:linear-gradient(130deg,#f0d49b,#bf8d46 60%,#a67635);color:#25170c;border-color:#e0b977;font-weight:750;box-shadow:inset 0 1px #fff2c4a6,0 4px 16px #0005}
+html[data-theme="aristocrat"] .primary:hover{background:linear-gradient(130deg,#ffe4b0,#d2a15a);color:#25170c}
+html[data-theme="aristocrat"] .theme-toggle{border-radius:30px;border-color:#a27c46;font-size:13px}
+html[data-theme="aristocrat"] #xp,html[data-theme="aristocrat"] .tag{background:#b58c3826;color:#f1d4a0;border:1px solid #98713d66}
+html[data-theme="aristocrat"] .card,html[data-theme="aristocrat"] .panel{background:linear-gradient(135deg,#2e211beF,#1b130ff5);border-color:#8e694b66;box-shadow:inset 0 1px #e7bf7f14,0 10px 28px #0003;border-radius:12px}
+html[data-theme="aristocrat"] .chapter-heading{background:linear-gradient(110deg,#503724ef,#241a13f5);border-color:#a57c425e;border-radius:10px}
+html[data-theme="aristocrat"] .chapter-number{color:#c29656}html[data-theme="aristocrat"] .chapter-count{color:#ebc98d}
+html[data-theme="aristocrat"] .course-progress{background:#36271c;border:1px solid #976b343d}
+html[data-theme="aristocrat"] .course-progress span{background:linear-gradient(90deg,#806035,#e4c98a)}
+html[data-theme="aristocrat"] .chapter-stages:before{background:linear-gradient(#95703d88,#4b3524)}
+html[data-theme="aristocrat"] .lesson .step{background:linear-gradient(145deg,#705132,#352318);border-color:#36251a;color:#e8cc99;box-shadow:0 3px #160e09,inset 0 1px #d7b67b40}
+html[data-theme="aristocrat"] .lesson.is-current{border-color:#d6ac67;box-shadow:0 0 20px #c3913014}
+html[data-theme="aristocrat"] .lesson.is-current .step{background:linear-gradient(135deg,#f1d395,#aa7736);color:#291a0d}
+html[data-theme="aristocrat"] .lesson.is-complete .step{color:#ffe5b0;background:#65502a}
+html[data-theme="aristocrat"] .lesson.is-locked{background:linear-gradient(135deg,#231b15ed,#18120fec);border-color:#4f3d2d}
+html[data-theme="aristocrat"] .lesson.is-locked h3{color:#ad967b}
+html[data-theme="aristocrat"] .lesson.is-locked .step{background:#30271e;color:#8c7559;border-color:#35291e;box-shadow:0 3px #100b08}
+html[data-theme="aristocrat"] .locked-label{color:#ad967b;border-color:#70523766}
+html[data-theme="aristocrat"] .mode-card{border-color:#97704180;border-radius:12px;background:linear-gradient(120deg,#4c3423ef,#20160ff5);box-shadow:inset 0 1px #d6ad661f,0 8px 20px #0004}
+html[data-theme="aristocrat"] .mode-friend{background:linear-gradient(120deg,#453827ef,#1e1912f5)}
+html[data-theme="aristocrat"] .mode-puzzle{background:linear-gradient(120deg,#493126ef,#21150ff5)}
+html[data-theme="aristocrat"] .mode-icon{color:#e6bd77;text-shadow:0 3px #0b0605,1px 0 #ffe2a54d}
+html[data-theme="aristocrat"] .mode-card small{color:#c0ab8c}
+html[data-theme="aristocrat"] .minimal-ring{background:radial-gradient(circle at 35% 25%,#6f502c,#291a10);border:1px solid #b58c49;box-shadow:0 0 50px #d58a2320,inset 0 2px #efcc8640}
+html[data-theme="aristocrat"] .minimal-knight{color:#e1ba78;text-shadow:0 2px #8e6333,0 4px #614321,0 7px 10px #0009}
+html[data-theme="aristocrat"] .minimal-welcome{align-items:flex-start;text-align:left;padding-left:clamp(0px,4vw,60px)}
+html[data-theme="aristocrat"] .minimal-description{color:#e1cdb0;text-shadow:0 2px 8px #000}
+html[data-theme="aristocrat"] .status{background:linear-gradient(110deg,#514022,#2b2115);border:1px solid #96733e6e;color:#f2ddb7}
+html[data-theme="aristocrat"] .thinking{background:linear-gradient(135deg,#3d2b1c,#1b130d);border-color:#d2a567;color:#f1d5a8;box-shadow:0 8px 35px #0009}
+html[data-theme="aristocrat"] .thinking-dots i{background:#e8bd77}
+html[data-theme="aristocrat"] .active-clock{background:#a2793433;color:#f9d595;border:1px solid #b58c4966}
+html[data-theme="aristocrat"] .bot-clock-thinking{box-shadow:0 0 12px #d7953633}
+html[data-theme="aristocrat"] .move-row:nth-child(odd){background:#a2743520}
+html[data-theme="aristocrat"] .move-row:last-child{color:#f0c984}
+html[data-theme="aristocrat"] dialog{background:#241910;color:#ead4af;border-color:#ac814c;box-shadow:0 20px 80px #000a}
+html[data-theme="aristocrat"] dialog::backdrop{background:#0a0604bb;backdrop-filter:blur(5px)}
+html[data-theme="aristocrat"] .board{border-color:#ae8150;border-top-color:#dfb873;background:repeating-linear-gradient(3deg,#10080635 0 1px,transparent 2px 8px),linear-gradient(115deg,#684226,#28170f 50%,#623f27);box-shadow:inset 0 2px #f5cf8955,0 3px #684426,0 8px #3f2818,0 12px #20130b,0 26px 35px -8px #000b}
+html[data-theme="aristocrat"] .board .square{background:repeating-linear-gradient(3deg,#875b2820 0 1px,transparent 2px 7px),linear-gradient(125deg,#dfbf88,#b48a52);border:0;box-shadow:inset 0 1px #ffe1ac55,inset 0 -1px #70461e40;border-radius:0}
+html[data-theme="aristocrat"] .board .square.dark{background:repeating-linear-gradient(3deg,#0b080435 0 1px,transparent 2px 7px),linear-gradient(125deg,#754b31,#472a1d);box-shadow:inset 0 1px #b8834b33,inset 0 -1px #1c0e0866}
+html[data-theme="aristocrat"] .board .square:hover{background:linear-gradient(125deg,#dbb66d,#a47838)}
+html[data-theme="aristocrat"] .board .square.last{background:linear-gradient(125deg,#b49a53,#82642e);box-shadow:inset 0 0 0 2px #f1cf7366}
+html[data-theme="aristocrat"] .board .square.selected{background:linear-gradient(125deg,#f1d28b,#bd8537);box-shadow:inset 0 0 0 3px #f5d88a}
+html[data-theme="aristocrat"] .board .square.in-check{background:radial-gradient(#b9764e,#713120);box-shadow:inset 0 0 0 3px #e99c67}
+html[data-theme="aristocrat"] .board .dark .coord{color:#e6c48c}
+html[data-theme="aristocrat"] .piece-b .piece-body{stroke:#140b06}
+html[data-theme="aristocrat"] .piece-b .piece-detail{stroke:#bd946b}
+html[data-theme="aristocrat"] .piece-b .piece-shine{stroke:#d3ad79}
+html[data-theme="aristocrat"] .review-board{border-color:#6d492c}
+html[data-theme="aristocrat"] .review-square{background:linear-gradient(125deg,#bd9f7c,#9e8061)}
+html[data-theme="aristocrat"] .review-square.dark{background:linear-gradient(125deg,#754b31,#472a1d)}
+@keyframes firelight{0%{opacity:.55}35%{opacity:.8}55%{opacity:.65}100%{opacity:1}}
+@media(max-width:760px){.theme-toggle{font-size:11px;padding:8px 10px;margin-left:auto}html[data-theme="aristocrat"] body:before{background-position:62% center}html[data-theme="aristocrat"] .minimal-welcome{align-items:center;text-align:center;padding-left:0}header{gap:12px}header #xp{font-size:12px}}
+@media(prefers-reduced-motion:reduce){html[data-theme="aristocrat"] body:after{animation:none}}
+
+html[data-theme="aristocrat"] .game-settings button[aria-pressed="true"]{background:linear-gradient(135deg,#70502b,#382615);border-color:#e3b76e;box-shadow:inset 0 0 0 1px #d6a45d80,0 4px 14px #0005}
+html[data-theme="aristocrat"] .custom-time,html[data-theme="aristocrat"] .clock-help{background:#a67a3020}
+html[data-theme="aristocrat"] .custom-time input{background:#1c140e;color:#f2ddb8;border-color:#8b673c}
+html[data-theme="aristocrat"] .clock-instruction{background:#4c391d;color:#f1d29a}
+html[data-theme="aristocrat"] .clock-button.awaiting-press{background:linear-gradient(135deg,#e7c789,#a47836);border-color:#edc782;color:#26180b}
+
+
+/* Original portrait, shown only in the aristocrat theme. */
+.aristocrat-photo{position:relative;width:calc(100% - 48px);max-width:650px;margin:66px max(32px, calc((100% - 1116px) / 2)) 8px auto;left:0;padding:16px;border:1px solid #b58a4d;border-radius:16px;isolation:isolate;background:repeating-linear-gradient(4deg,#140a0630 0 1px,transparent 2px 8px),linear-gradient(135deg,#6b4729,#2b1b11 45%,#53361f);box-shadow:inset 0 1px 1px #f0ce9366,inset 0 -3px 4px #0b0607b3,0 4px 0 #24150d,0 16px 36px #0008,0 0 60px #c18a2920;animation:portrait-arrive .65s ease-out backwards}.aristocrat-photo:before{content:"";position:absolute;inset:8px;border:1px solid #c7a46380;border-top-color:#f1d49a99;border-bottom-color:#79542b;border-radius:9px;pointer-events:none}.aristocrat-photo:after{content:"";position:absolute;inset:17px;border-radius:4px;box-shadow:inset 0 0 0 1px #f2cc7940,inset 0 2px 9px #0005;pointer-events:none}
+.aristocrat-photo img{display:block;width:100%;height:auto;border:1px solid #17100a;border-radius:4px}
+html:not([data-theme="aristocrat"]) .aristocrat-photo{display:none}
+@keyframes portrait-arrive{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}@media(max-width:760px){.aristocrat-photo{width:calc(100% - 40px);max-width:480px;margin:38px auto 4px;left:0;padding:12px;border-radius:12px}.aristocrat-photo:before{inset:6px;border-radius:7px}.aristocrat-photo:after{inset:13px}}@media(prefers-reduced-motion:reduce){.aristocrat-photo{animation:none}}
+html[data-theme="aristocrat"] .mode-arrow{background:linear-gradient(135deg,#90663340,#1d130d);border-color:#ba8e4c99;color:#f3d497;box-shadow:inset 0 1px #f5d99926}
+html[data-theme="aristocrat"] .mode-card:hover .mode-arrow,html[data-theme="aristocrat"] .mode-card:focus-visible .mode-arrow{background:#76512d;border-color:#edc782}
+
+/* Portrait and original chess aphorisms. */
+.portrait-layout{display:grid;grid-template-columns:minmax(230px,1fr) minmax(0,650px);gap:48px;align-items:center;max-width:1116px;width:calc(100% - 64px);margin:66px auto 8px}.portrait-layout .aristocrat-photo{width:100%;max-width:650px;margin:0;left:0}.portrait-quotes{padding:20px 0}.portrait-quotes h2{font-size:clamp(26px,3vw,39px);line-height:1.25;margin:16px 0 26px}.portrait-quotes blockquote{margin:0 0 24px;padding:0 0 0 20px;border-left:2px solid #b88b49;color:#e9c993;font:italic 25px/1.5 Georgia,serif}.portrait-quotes p{font-size:14px;line-height:1.8;color:#ccb492}.portrait-quotes .quote-last{font-family:Georgia,serif;color:#a98d6a;font-size:15px;margin-top:24px}
+html:not([data-theme="aristocrat"]) .portrait-layout{display:none}
+html[data-theme="aristocrat"] .board.has-3d>.square{opacity:0;pointer-events:none}
+.board .board3d-canvas{position:absolute;inset:0;width:100%;height:100%;z-index:6;display:block;border-radius:12px;touch-action:manipulation}
+html[data-theme="aristocrat"] .board.has-3d{background:#25170f;border-color:#9e733f;box-shadow:0 16px 40px #0008}
+.board3d-canvas:focus-visible{outline:2px solid #ecc782;outline-offset:3px}
+@media(max-width:1000px){.portrait-layout{gap:26px;grid-template-columns:minmax(200px,.8fr) minmax(0,1.2fr)}.portrait-quotes blockquote{font-size:21px}}
+@media(max-width:760px){.portrait-layout{grid-template-columns:1fr;width:calc(100% - 40px);margin:38px auto 8px;gap:24px}.portrait-quotes{padding:0}.portrait-quotes h2{font-size:28px;margin:12px 0 18px}.portrait-layout .aristocrat-photo{max-width:480px;justify-self:center}.portrait-quotes .quote-last{margin-top:12px}}
+html[data-theme="aristocrat"] .piece-customizer{background:linear-gradient(135deg,#2e211b,#1b130f);border-color:#8e694b66}
+html[data-theme="aristocrat"] .piece-customizer button[aria-pressed="true"]{background:linear-gradient(135deg,#70502b,#382615);border-color:#e3b76e;box-shadow:inset 0 0 0 1px #d6a45d80}
+html[data-theme="aristocrat"] svg.piece-b .piece-detail{stroke:#999}html[data-theme="aristocrat"] svg.piece-b .piece-shine{stroke:#aaa}
+html[data-theme="aristocrat"] svg.piece-b .piece-body{stroke:#080808}html[data-theme="aristocrat"] svg.piece-w .piece-body{stroke:#777}
+
+/* Walnut cabinet finish matching the aristocrat room. */
+html[data-theme="aristocrat"] .board.has-3d{background:radial-gradient(ellipse at 30% 0,#6a432540,transparent 65%),#20150e;border-color:#795631;border-top-color:#b28b57;border-radius:13px;box-shadow:inset 0 1px #dbb97c40,0 3px #3e2819,0 7px #21160f,0 22px 40px #0009}
+html[data-theme="aristocrat"] .board:not(.has-3d){background:repeating-linear-gradient(2deg,#120b0538 0 1px,transparent 2px 9px),linear-gradient(130deg,#805535,#322115 55%,#69452b);border-color:#a4804f}
+html[data-theme="aristocrat"] .board:not(.has-3d) .square{background:repeating-linear-gradient(87deg,#90682e13 0 1px,transparent 2px 7px),linear-gradient(120deg,#bd9f7c,#9e8061)}
+html[data-theme="aristocrat"] .board:not(.has-3d) .square.dark{background:repeating-linear-gradient(88deg,#28170828 0 1px,transparent 2px 8px),linear-gradient(120deg,#885c39,#624127)}
+html[data-theme="aristocrat"] .board:not(.has-3d) .square.last{background:linear-gradient(125deg,#c9ac70,#98713b)}
+html[data-theme="aristocrat"] .board:not(.has-3d) .square.selected{background:linear-gradient(125deg,#edd28f,#b8863e)}
+html[data-theme="aristocrat"] .board:not(.has-3d) .square.in-check{background:radial-gradient(#b9764e,#713120)}
+html[data-theme="aristocrat"] .board .square.legal:after{background:#53f1d0;box-shadow:0 0 0 2px #18392f,0 1px 5px #0008}
+html[data-theme="aristocrat"] .board .square.capture-target:after{background:transparent;border-color:#53f1d0}
+
+/* Saved board colors; highlights retain their own contrast colors. */
+html[data-piece-style] .board:not(.has-3d) .square:not(.selected):not(.last):not(.in-check){background:repeating-linear-gradient(87deg,#0000000d 0 1px,transparent 2px 7px),linear-gradient(135deg,#ffffff0d,#00000015),var(--chess-cell-light,#756452)}
+html[data-piece-style] .board:not(.has-3d) .square.dark:not(.selected):not(.last):not(.in-check){background:repeating-linear-gradient(88deg,#00000015 0 1px,transparent 2px 8px),linear-gradient(135deg,#ffffff0d,#00000015),var(--chess-cell-dark,#302720)}
+html[data-piece-style] .board .square .coord,html[data-piece-style] .review-square .coord{color:var(--chess-ink-light,#f5e4cb)}
+html[data-piece-style] .board .square.dark .coord,html[data-piece-style] .review-square.dark .coord{color:var(--chess-ink-dark,#f5e4cb)}
+html[data-piece-style] .review-square{background:var(--chess-cell-light,#756452)}html[data-piece-style] .review-square.dark{background:var(--chess-cell-dark,#302720)}
+.board-color-settings{border-top:1px solid var(--line)!important;padding-top:16px!important}.board-color-settings>.piece-color-inputs{margin-top:14px}.piece-color-inputs #board-apply-colors{margin-left:0}.piece-color-inputs #board-defaults{margin-left:auto}
