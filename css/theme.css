@@ -83,7 +83,7 @@ html[data-theme="aristocrat"] .mode-card:hover .mode-arrow,html[data-theme="aris
 /* Portrait and original chess aphorisms. */
 .portrait-layout{display:grid;grid-template-columns:minmax(230px,1fr) minmax(0,650px);gap:48px;align-items:center;max-width:1116px;width:calc(100% - 64px);margin:66px auto 8px}.portrait-layout .aristocrat-photo{width:100%;max-width:650px;margin:0;left:0}.portrait-quotes{padding:20px 0}.portrait-quotes h2{font-size:clamp(26px,3vw,39px);line-height:1.25;margin:16px 0 26px}.portrait-quotes blockquote{margin:0 0 24px;padding:0 0 0 20px;border-left:2px solid #b88b49;color:#e9c993;font:italic 25px/1.5 Georgia,serif}.portrait-quotes p{font-size:14px;line-height:1.8;color:#ccb492}.portrait-quotes .quote-last{font-family:Georgia,serif;color:#a98d6a;font-size:15px;margin-top:24px}
 html:not([data-theme="aristocrat"]) .portrait-layout{display:none}
-html[data-theme="aristocrat"] .board.has-3d>.square{opacity:0;pointer-events:none}
+.board.has-3d>.square{opacity:0;pointer-events:none}
 .board .board3d-canvas{position:absolute;inset:0;width:100%;height:100%;z-index:6;display:block;border-radius:12px;touch-action:manipulation}
 html[data-theme="aristocrat"] .board.has-3d{background:#25170f;border-color:#9e733f;box-shadow:0 16px 40px #0008}
 .board3d-canvas:focus-visible{outline:2px solid #ecc782;outline-offset:3px}

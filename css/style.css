@@ -177,9 +177,12 @@ svg.piece-w .piece-body>path:not(.piece-detail):not(.piece-shine){filter:drop-sh
 .opening-heading h2{margin:5px 0}
 .opening-heading p{margin:4px 0 16px}
 .opening-board-wrap{max-width:640px;margin:0 auto}
-.opening-board{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));border:7px solid #344e3e;border-radius:8px;aspect-ratio:1;box-shadow:0 8px 0 #233b32,0 16px 26px #233b3226}
-.opening-square{position:relative;display:grid;place-items:center;aspect-ratio:1;background:#eee9d6;font-family:'Segoe UI Symbol','Arial Unicode MS',serif;font-size:clamp(22px,5.3vw,54px);line-height:1;color:#172b23}
-.opening-square.dark{background:#85a080}
+.opening-board{position:relative;display:grid;grid-template-columns:repeat(8,minmax(0,1fr));border:7px solid #344e3e;border-radius:8px;aspect-ratio:1;overflow:hidden;box-shadow:0 8px 0 #233b32,0 16px 26px #233b3226}
+.opening-board .board3d-canvas{position:absolute;inset:0;width:100%;height:100%;z-index:6;display:block;touch-action:manipulation}
+.opening-board.has-3d .opening-square{visibility:hidden}
+.opening-square{position:relative;display:grid;place-items:center;aspect-ratio:1;background:var(--chess-cell-light,#eee9d6);font-family:'Segoe UI Symbol','Arial Unicode MS',serif;font-size:clamp(22px,5.3vw,54px);line-height:1;color:#172b23}
+.opening-square.dark{background:var(--chess-cell-dark,#85a080)}
+.opening-square>svg.piece{width:78%;height:78%;z-index:1}
 .opening-square.last{box-shadow:inset 0 0 0 4px #d5bc69}
 .opening-square>span{position:absolute;left:3px;bottom:1px;font:10px system-ui;color:#344e3e}
 .opening-square.dark>span{color:#f1e8d0}
@@ -195,8 +198,8 @@ svg.piece-w .piece-body>path:not(.piece-detail):not(.piece-shine){filter:drop-sh
 .opening-move.is-active{border-color:var(--green);background:#e7eddf}
 html[data-theme="aristocrat"] .activity-tile,html[data-theme="aristocrat"] .activity-track,html[data-theme="aristocrat"] .daily-card,html[data-theme="aristocrat"] .opening-option[aria-pressed="true"],html[data-theme="aristocrat"] .engine-review{background:linear-gradient(135deg,#36271c,#1b130d);border-color:#8e694b66}
 html[data-theme="aristocrat"] .daily-icon{background:#bd8e4e}
-html[data-theme="aristocrat"] .opening-square{background:#d2b887;color:#21160f}
-html[data-theme="aristocrat"] .opening-square.dark{background:#62402b;color:#f1dfc0}
+html[data-theme="aristocrat"] .opening-square{background:var(--chess-cell-light,#d2b887);color:#21160f}
+html[data-theme="aristocrat"] .opening-square.dark{background:var(--chess-cell-dark,#62402b);color:#f1dfc0}
 html[data-theme="aristocrat"] .engine-progress,html[data-theme="aristocrat"] .opening-note{background:#45351f;color:#f2dfbf}
 @media(max-width:760px){
  header{gap:10px}

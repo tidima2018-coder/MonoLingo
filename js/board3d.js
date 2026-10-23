@@ -61,7 +61,28 @@ window.createChessBoard3D=function(host){
  return {update,setEnabled(value){settleAnimation();enabled=value;if(!value){canvas.remove();host.classList.remove('has-3d');animation=null;}else{host.appendChild(canvas);resize();if(window.chessBoardViewState)update(window.chessBoardViewState);}}};
 };
 (() => {
- let view=null,loading=false,failed=false;const enabled=()=>document.documentElement.dataset.theme==='aristocrat';
- async function sync(){const host=document.getElementById('board');if(!host)return;if(view){view.setEnabled(enabled());return;}if(!enabled()||loading||failed)return;loading=true;try{if(!window.THREE)await new Promise((resolve,reject)=>{const script=document.createElement('script');script.src='js/vendor/three.min.js';script.onload=resolve;script.onerror=reject;document.head.appendChild(script);});if(!enabled())return;view=window.createChessBoard3D(host);view.setEnabled(true);}catch(error){failed=true;console.warn('3D board unavailable; using the standard board.',error);}finally{loading=false;}}
- document.addEventListener('chess-position',event=>{if(view&&enabled())view.update(event.detail);});new MutationObserver(sync).observe(document.documentElement,{attributes:true,attributeFilter:['data-theme']});if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',sync);else sync();
+ let view=null,host=null,loading=false,failed=false;const modeKey='chess-board-view-v1';
+ function enabled(){try{const saved=localStorage.getItem(modeKey);if(saved==='3d')return true;if(saved==='2d')return false;}catch(error){}return document.documentElement.dataset.theme==='aristocrat';}
+ function currentState(){return host?.id==='opening-board'?window.openingBoardViewState:window.chessBoardViewState;}
+ async function sync(){
+  const nextHost=document.getElementById('opening-board')||document.getElementById('board');
+  if(!nextHost)return;
+  if(host!==nextHost){if(view)view.setEnabled(false);view=null;host=nextHost;}
+  if(view){view.setEnabled(enabled());if(enabled()&&currentState())view.update(currentState());return;}
+  if(!enabled()||loading||failed)return;
+  loading=true;
+  try{
+   if(!window.THREE)await new Promise((resolve,reject)=>{const script=document.createElement('script');script.src='js/vendor/three.min.js';script.onload=resolve;script.onerror=reject;document.head.appendChild(script);});
+   if(!enabled())return;
+   view=window.createChessBoard3D(host);view.setEnabled(true);if(currentState())view.update(currentState());
+  }catch(error){failed=true;console.warn('3D board unavailable; using the standard board.',error);}
+  finally{loading=false;}
+ }
+ document.addEventListener('chess-position',event=>{if(host?.id==='board'&&view&&enabled())view.update(event.detail);});
+ document.addEventListener('chess-opening-position',event=>{if(host?.id==='opening-board'&&view&&enabled())view.update(event.detail);});
+ document.addEventListener('piece-appearance-change',()=>{if(view&&enabled()&&currentState())view.update(currentState());});
+ document.addEventListener('board-appearance-change',()=>{if(view&&enabled()&&currentState())view.update(currentState());});
+ document.addEventListener('board-view-change',sync);
+ new MutationObserver(sync).observe(document.documentElement,{attributes:true,attributeFilter:['data-theme']});
+ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',sync);else sync();
 })();
