@@ -15,7 +15,8 @@
  document.addEventListener('piece-appearance-change',()=>render());
  document.addEventListener('board-appearance-change',()=>render());
  let active=saved.selected,ply=0,game;
- function persist(){try{localStorage.setItem(key,JSON.stringify(saved));}catch(error){}}
+ function persist(){try{localStorage.setItem(key,JSON.stringify(saved));}catch(error){}if(window.SupabaseApp)window.SupabaseApp.saveOpeningProgress(saved.completed).catch(error=>{console.error('Could not save opening progress:',error);});}
+ document.addEventListener('supabase-profile-loaded',event=>{const remote=Array.isArray(event.detail.profile.completed_openings)?event.detail.profile.completed_openings:[];const merged=[...new Set([...saved.completed,...remote])].filter(id=>lessons.some(lesson=>lesson.id===id));const changed=merged.length!==saved.completed.length;saved.completed=merged;if(changed){try{localStorage.setItem(key,JSON.stringify(saved));}catch(error){}render();}if(window.SupabaseApp)window.SupabaseApp.saveOpeningProgress(saved.completed).catch(error=>console.error('Could not sync opening progress:',error));});
  function choose(id){active=id;ply=0;saved.selected=id;persist();render();}
  function render(){
   const lesson=lessons.find(item=>item.id===active)||lessons[0];

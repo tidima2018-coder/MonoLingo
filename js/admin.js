@@ -1,0 +1,11 @@
+'use strict';
+(() => {
+ const $=selector=>document.querySelector(selector),form=$('#admin-password-form'),status=$('#admin-status'),access=$('#admin-access'),dashboard=$('#admin-dashboard');
+ function showError(error){status.textContent=error?.message||'Не удалось загрузить данные.';}
+ function tableRow(user){const row=document.createElement('tr');[user.username,user.email,new Date(user.created_at).toLocaleString('ru-RU'),user.games_played,user.wins,user.losses,user.puzzles_solved,user.xp].forEach(value=>{const cell=document.createElement('td');cell.textContent=String(value??'');row.append(cell);});return row;}
+ function renderReviews(reviews){const list=$('#reviews-list');list.replaceChildren();if(!reviews.length){const empty=document.createElement('p');empty.textContent='Отзывов пока нет.';list.append(empty);return;}reviews.forEach(review=>{const article=document.createElement('article');article.className='review-card';const heading=document.createElement('strong');heading.textContent=review.username;const date=document.createElement('time');date.dateTime=review.created_at;date.textContent=new Date(review.created_at).toLocaleString('ru-RU');const message=document.createElement('p');message.textContent=review.message;article.append(heading,date,message);list.append(article);});}
+ async function openDashboard(password){status.textContent='Проверяю пароль и загружаю данные…';const result=await window.SupabaseApp.getAdminDashboard(password);const body=$('#users-table tbody');body.replaceChildren(...result.users.map(tableRow));renderReviews(result.reviews);access.close();dashboard.hidden=false;}
+ form.onsubmit=async event=>{event.preventDefault();const button=form.querySelector('button');button.disabled=true;status.textContent='';try{await openDashboard($('#admin-password').value);}catch(error){showError(error);}finally{button.disabled=false;}};
+ window.addEventListener('supabase-admin-ready',()=>$('#admin-password').focus());
+ document.addEventListener('DOMContentLoaded',()=>{if(!access.open)access.showModal();});
+})();
