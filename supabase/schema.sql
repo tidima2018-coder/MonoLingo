@@ -17,6 +17,8 @@ create table if not exists public.profiles (
  created_at timestamptz not null default now()
 );
 
+alter table public.profiles add column if not exists draws integer not null default 0 check (draws >= 0);
+
 create table if not exists public.reviews (
  id bigint generated always as identity primary key,
  user_id uuid not null references auth.users(id) on delete cascade,

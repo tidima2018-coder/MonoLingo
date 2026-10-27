@@ -1,6 +1,7 @@
 -- Run in Supabase SQL Editor after replacing YOUR_MASTER_PASSWORD below.
 create extension if not exists pgcrypto with schema extensions;
 alter table public.profiles add column if not exists email text not null default '';
+alter table public.profiles add column if not exists draws integer not null default 0 check (draws >= 0);
 alter table public.profiles enable row level security;
 alter table public.reviews enable row level security;
 revoke all on table public.profiles from anon, authenticated;
