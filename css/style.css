@@ -357,3 +357,5 @@ html[data-theme="aristocrat"] .engine-progress,html[data-theme="aristocrat"] .op
 
 /* Hide the four header navigation labels */
 .site-nav{display:none!important}
+
+#admin-access[open]{width:min(calc(100vw - 32px),620px);max-width:620px;max-height:calc(100vh - 32px);overflow:auto;margin:auto}
