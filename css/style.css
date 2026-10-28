@@ -354,3 +354,6 @@ html[data-theme="aristocrat"] .engine-progress,html[data-theme="aristocrat"] .op
 #activities .activity-track .path>.lesson{border-radius:12px}
 @media(max-width:760px){#activities .activity-group>.activity-track>summary{grid-template-columns:minmax(0,1fr) auto;gap:10px;min-height:112px;padding:14px}#activities .activity-group>.activity-track>summary>.activity-track-title{grid-column:1;grid-row:1}#activities .activity-group>.activity-track>summary>.activity-track-count{grid-column:2;grid-row:1}#activities .activity-group>.activity-track>summary>.activity-track-toggle{grid-column:1 / -1;grid-row:2;justify-self:end}}
 #activities{scroll-margin-top:28px}
+
+/* Hide the four header navigation labels */
+.site-nav{display:none!important}
