@@ -12,6 +12,7 @@
  settings.insertAdjacentElement('afterend',section);
  const input=section.querySelector('#engine-skill'),output=section.querySelector('#engine-skill-value');
  function persist(){output.value=input.value;output.textContent=input.value;try{localStorage.setItem(key,input.value);}catch(error){}document.dispatchEvent(new CustomEvent('stockfish-skill-change',{detail:{skill:Number(input.value)}}));}
+ document.addEventListener('account-settings-loaded',()=>{const value=Number(localStorage.getItem(key));if(validSkill(value)&&!params.has('skill')){input.value=String(value);persist();}});
  function syncVisibility(mode=document.querySelector('#mode')?.value){section.hidden=mode==='friend';}
  input.addEventListener('input',persist);persist();
  document.querySelector('#settings')?.addEventListener('click',event=>{

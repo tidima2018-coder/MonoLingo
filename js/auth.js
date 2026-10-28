@@ -2,7 +2,11 @@
 document.documentElement.classList.add('auth-pending');
 (() => {
  const api=window.SupabaseApp;
- let profile=null,ready=false,syncTimer=0,authCheckActive=true;
+ let profile=null,ready=false,syncTimer=0,accountDataTimer=0,authCheckActive=true;
+ const accountKeys=['chess-theme','chess-piece-appearance-v1','chess-board-colors-v1','chess-board-view-v1','chess-stockfish-skill-v1','chess-openings-v1','chess-active-game-v1'];
+ function readAccountData(){const data={};for(const key of accountKeys){try{const value=localStorage.getItem(key);if(value!==null)data[key]=value;}catch(error){}}return data;}
+ function applyAccountData(data){if(!data||typeof data!=='object')return;for(const key of accountKeys){if(typeof data[key]!=='string')continue;try{localStorage.setItem(key,data[key]);}catch(error){}}document.dispatchEvent(new CustomEvent('account-settings-loaded',{detail:{data}}));}
+ function scheduleAccountDataSync(){if(!ready)return;clearTimeout(accountDataTimer);accountDataTimer=setTimeout(async()=>{try{await api.saveAccountData(readAccountData());}catch(error){console.error('Не удалось сохранить настройки аккаунта:',error);document.dispatchEvent(new CustomEvent('cloud-sync-error',{detail:{message:message(error)}}));}},5000);}
  const el=(tag,attrs={},text='')=>{const node=document.createElement(tag);for(const [key,value] of Object.entries(attrs))node.setAttribute(key,value);if(text)node.textContent=text;return node;};
  const message=error=>{
   const raw=String(error?.message||''),code=String(error?.code||'');
@@ -40,15 +44,16 @@ document.documentElement.classList.add('auth-pending');
  document.addEventListener('supabase-profile-updated',event=>{profile=event.detail.profile;const name=document.querySelector('.account-name'),xp=document.querySelector('.account-xp');if(name)name.textContent=profile.username;if(xp)xp.textContent='XP '+profile.xp;});
  async function loadProfile(user){
   const activeId=localStorage.getItem('chess-active-profile-id');
-  if(activeId&&activeId!==user.id){localStorage.setItem('chess-active-profile-id',user.id);location.reload();return false;}
-  if(!activeId){for(const key of ['chess-active-game-v1','chess-openings-v1']){const legacy=localStorage.getItem(key);if(legacy&&!localStorage.getItem(key+':'+user.id))localStorage.setItem(key+':'+user.id,legacy);if(legacy)localStorage.removeItem(key);}localStorage.setItem('chess-active-profile-id',user.id);}
+  if(activeId&&activeId!==user.id){for(const key of accountKeys){try{localStorage.removeItem(key);}catch(error){}}localStorage.setItem('chess-active-profile-id',user.id);location.reload();return false;}
+  if(!activeId){for(const key of ['chess-active-game-v1','chess-openings-v1']){const scoped=localStorage.getItem(key+':'+user.id);if(scoped&&!localStorage.getItem(key))localStorage.setItem(key,scoped);}localStorage.setItem('chess-active-profile-id',user.id);}
   profile=await api.profileFor(user.id);if(!profile||profile.id!==user.id)throw new Error('Профиль не найден. Проверь SQL-схему и триггер создания профиля.');
+  const accountData=user.user_metadata?.chess_app_data;if(accountData&&typeof accountData==='object')applyAccountData(accountData);else scheduleAccountDataSync();
   const home=/\/(?:index\.html)?$/.test(location.pathname);if(window.App?.hydrateCloudProgress&&window.App.hydrateCloudProgress(profile)&&home){location.reload();return false;}
-  ready=true;addAccountControls();window.dispatchEvent(new CustomEvent('supabase-profile-loaded',{detail:{profile}}));const gate=document.getElementById('auth-gate');if(gate)gate.hidden=true;document.documentElement.classList.remove('auth-pending');if(location.pathname.endsWith('/admin.html'))window.dispatchEvent(new CustomEvent('supabase-admin-ready',{detail:{profile}}));scheduleProgressSync();return true;
+  ready=true;if(!accountData||typeof accountData!=='object')scheduleAccountDataSync();addAccountControls();window.dispatchEvent(new CustomEvent('supabase-profile-loaded',{detail:{profile}}));const gate=document.getElementById('auth-gate');if(gate)gate.hidden=true;document.documentElement.classList.remove('auth-pending');if(location.pathname.endsWith('/admin.html'))window.dispatchEvent(new CustomEvent('supabase-admin-ready',{detail:{profile}}));scheduleProgressSync();return true;
  }
  function scheduleProgressSync(){if(!ready||!window.App?.getProgressSnapshot)return;clearTimeout(syncTimer);syncTimer=setTimeout(async()=>{try{await api.saveProgress(window.App.getProgressSnapshot());}catch(error){console.error('Не удалось сохранить прогресс в Supabase:',error);document.dispatchEvent(new CustomEvent('cloud-sync-error',{detail:{message:message(error)}}));}},250);}
  async function start(){if(!api?.configured||!api.client){showGate('Подключи Supabase: заполни Project URL и Publishable key в js/supabaseClient.js.');return;}try{const user=await api.getCurrentUser();if(!authCheckActive)return;if(!user){showGate();return;}document.documentElement.classList.remove('auth-pending');await loadProfile(user);}catch(error){if(authCheckActive)showGate(message(error));}}
- document.addEventListener('app-progress-change',scheduleProgressSync);document.addEventListener('DOMContentLoaded',start,{once:true});
+ document.addEventListener('app-progress-change',scheduleProgressSync);for(const eventName of ['piece-appearance-change','board-appearance-change','board-view-change','stockfish-skill-change','app-account-data-change'])document.addEventListener(eventName,scheduleAccountDataSync);document.addEventListener('DOMContentLoaded',start,{once:true});
  api?.client?.auth.onAuthStateChange(event=>{if(event==='SIGNED_OUT'){ready=false;showGate();}});
  window.SupabaseAuth={get profile(){return profile;},get ready(){return ready;}};
 })();

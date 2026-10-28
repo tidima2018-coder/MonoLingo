@@ -1,4 +1,4 @@
-﻿'use strict';
+'use strict';
 window.PieceAppearance=(()=>{
  const key='chess-piece-appearance-v1';const palettes={mono:{name:'Белые и чёрные',white:'#dfc18e',black:'#141414'},ivory:{name:'Слоновая кость',white:'#f5dfb7',black:'#4b2c20'},blue:{name:'Лёд и сапфир',white:'#e3f2ff',black:'#233a80'},green:{name:'Жемчуг и нефрит',white:'#eef4e7',black:'#194b3c'}};
  let value={style:'classic',whiteStyle:'royal',white:palettes.mono.white,black:'#141414'};const validColor=v=>/^#[0-9a-f]{6}$/i.test(v||'');
@@ -11,7 +11,7 @@ window.PieceAppearance=(()=>{
   const shapesForPiece=style==='modern'?shapes.modern:shapes.classic,id='piece-shading-'+(svg.uid=(svg.uid||0)+1),appearance=value,base=p.color==='w'?appearance.white:appearance.black,colors=[mix(base,.25),base,mix(base,-.3)];
   return '<svg class="piece piece-'+p.color+'" viewBox="0 0 100 100" aria-hidden="true"><defs><linearGradient id="'+id+'" x1="0" y1="0" x2="1" y2=".4"><stop stop-color="'+colors[0]+'"/><stop offset=".45" stop-color="'+colors[1]+'"/><stop offset="1" stop-color="'+colors[2]+'"/></linearGradient></defs><ellipse class="piece-shadow" cx="50" cy="87" rx="31" ry="7"/><g class="piece-body" style="fill:url(#'+id+')">'+shapesForPiece[p.type]+(style==='royal'?'<path d="M33 60H67L69 64H31Z"/><path d="M32 69H68" class="piece-shine"/>':'')+'<path d="M34 65H66L70 73H30Z"/><path d="M29 74H71L76 85Q50 91 24 85Z"/><path class="piece-shine" d="M32 79H66"/></g></svg>';
  }
- apply();window.addEventListener('storage',event=>{if(event.key!==key||!event.newValue)return;try{set(JSON.parse(event.newValue));}catch(e){}});
+ document.addEventListener('account-settings-loaded',()=>{try{const stored=JSON.parse(localStorage.getItem(key));if(stored)set(stored);}catch(e){}});apply();window.addEventListener('storage',event=>{if(event.key!==key||!event.newValue)return;try{set(JSON.parse(event.newValue));}catch(e){}});
  return {get:()=>({...value}),set,palettes,mix,svg};
 })();
 
@@ -22,7 +22,7 @@ window.BoardAppearance=(()=>{
  function ink(hex){const p=[1,3,5].map(i=>parseInt(hex.slice(i,i+2),16));return p[0]*.299+p[1]*.587+p[2]*.114>145?'#241e18':'#f5e4cb';}
  function apply(){const root=document.documentElement;for(const side of ['light','dark']){root.style.setProperty('--chess-cell-'+side,value[side]);root.style.setProperty('--chess-ink-'+side,ink(value[side]));}}
  function set(next){if(!valid(next.light)||!valid(next.dark))return;value={light:next.light,dark:next.dark};try{localStorage.setItem(key,JSON.stringify(value));}catch(e){}apply();document.dispatchEvent(new CustomEvent('board-appearance-change',{detail:{...value}}));}
- apply();window.addEventListener('storage',event=>{if(event.key===key&&event.newValue)try{set(JSON.parse(event.newValue));}catch(e){}});
+ document.addEventListener('account-settings-loaded',()=>{try{const stored=JSON.parse(localStorage.getItem(key));if(stored)set(stored);}catch(e){}});apply();window.addEventListener('storage',event=>{if(event.key===key&&event.newValue)try{set(JSON.parse(event.newValue));}catch(e){}});
  return {get:()=>({...value}),set,palettes};
 })();
 
@@ -30,6 +30,7 @@ window.BoardCustomizer=(()=>{
  const viewKey='chess-board-view-v1',viewPalettes={wood:{name:'Обожжённый орех',light:'#66503d',dark:'#39291e'},graphite:{name:'Графит',light:'#62656b',dark:'#252830'},forest:{name:'Тёмный лес',light:'#617162',dark:'#263d31'},night:{name:'Ночной сапфир',light:'#626f85',dark:'#253147'}};
  function is3D(){try{const saved=localStorage.getItem(viewKey);if(saved==='3d')return true;if(saved==='2d')return false;}catch(error){}return document.documentElement.dataset.theme==='aristocrat';}
  function set3D(enabled){try{localStorage.setItem(viewKey,enabled?'3d':'2d');}catch(error){}document.dispatchEvent(new CustomEvent('board-view-change',{detail:{enabled}}));}
+ document.addEventListener('account-settings-loaded',()=>document.dispatchEvent(new CustomEvent('board-view-change',{detail:{enabled:is3D()}})));
  function create(){
   const details=document.createElement('details');details.className='piece-customizer';
   details.innerHTML='<summary>♞ Доска и фигуры <span>Настроить</span></summary><div class="piece-customizer-content"><fieldset><legend>Вид доски</legend><button type="button" id="board-view-toggle" aria-pressed="false"></button><p class="small">Режим доски и оформления синхронизируется с партией, задачами и дебютами.</p></fieldset><fieldset><legend>Форма фигур</legend><div id="piece-style-options" class="piece-style-options"></div></fieldset><fieldset><legend>Цветовые наборы фигур</legend><div id="piece-palette-options" class="piece-palette-options"></div></fieldset><div class="piece-color-inputs"><label>Белые<input id="piece-white-color" type="color" aria-label="Цвет белых фигур"></label><label>Чёрные<input id="piece-black-color" type="color" aria-label="Цвет чёрных фигур"></label><button id="piece-apply-colors" type="button" disabled>Применить цвета</button><button id="piece-defaults" type="button">По умолчанию</button></div><p class="small">Цвета фигур сохраняются для всех режимов.</p><fieldset class="board-color-settings"><legend>Цвета доски</legend><div id="board-palette-options" class="piece-palette-options"></div><div class="piece-color-inputs"><label>Светлые клетки<input id="board-light-color" type="color" aria-label="Цвет светлых клеток"></label><label>Тёмные клетки<input id="board-dark-color" type="color" aria-label="Цвет тёмных клеток"></label><button id="board-apply-colors" type="button" disabled>Применить к доске</button><button id="board-defaults" type="button">Сбросить</button></div></fieldset></div>';
