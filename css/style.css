@@ -335,3 +335,10 @@ html[data-theme="aristocrat"] .engine-progress,html[data-theme="aristocrat"] .op
 @media(max-width:760px){.activity-group>.activity-track>summary{grid-template-columns:minmax(0,1fr) auto}.activity-group>.activity-track>summary>.activity-track-toggle{grid-column:1 / -1;grid-row:2;justify-self:end}.activity-group>.activity-track>summary>.activity-track-count{grid-column:2;grid-row:1}}
 @media(prefers-reduced-motion:reduce){.activity-group .activity-tile>.mode-arrow,.activity-group .activity-tile>.mode-arrow svg,.activity-group>.daily-card>.mode-arrow,.activity-track-toggle i,.activity-track-toggle i::before{transition:none}.activity-track[open]>.path{animation:none}}
 .activity-group>.activity-track>summary>.activity-track-title{font-size:inherit;color:inherit;font-weight:inherit}
+
+/* Uniform dimensions and spacing for every home mode */
+.activity-group .activity-tile,.activity-group>.daily-card{height:120px;min-height:120px;box-sizing:border-box}
+.activity-tiles{gap:12px;margin:20px 0}
+.activity-group>.daily-card{margin:20px 0 0}
+.activity-group>.daily-card+.activity-tile,.activity-group>.activity-tile+.activity-tile{margin-top:12px}
+@media(max-width:760px){.activity-group .activity-tile,.activity-group>.daily-card{height:140px;min-height:140px}.activity-group>.daily-card{margin-top:20px}}
