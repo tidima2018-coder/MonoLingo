@@ -296,3 +296,22 @@ html[data-theme="aristocrat"] .engine-progress,html[data-theme="aristocrat"] .op
 #auth-gate{background:#e8ece7}
 .auth-card{border:1px solid #d0d8d1;border-radius:20px;background:#e8ece7;box-shadow:0 24px 70px #233b3218}
 .auth-card .eyebrow{color:#315b43;letter-spacing:2.5px}.auth-card h1{color:#233b32;font-family:Georgia,'Times New Roman',serif;font-weight:600;letter-spacing:-1px}.auth-card .primary{background:#315b43;border-color:#315b43}.auth-card .primary:hover{background:#254a36}.auth-card input:focus{outline:3px solid #c9d4c5;outline-offset:1px;border-color:#718875}.auth-mode-toggle{border-color:#cbd5cb;background:#dce4dc}.auth-mode-toggle:hover{background:#d3ded4}
+
+/* Final alignment for the home activity cards */
+.activity-hub{align-items:stretch}
+.activity-group{display:flex;flex-direction:column;min-width:0}
+.activity-group>.activity-track{margin-top:auto;padding-top:13px}
+.activity-group .activity-tile{grid-template-columns:44px minmax(0,1fr) 48px;min-height:120px;padding-right:17px}
+.activity-group .activity-tile>.mode-icon{grid-column:1;grid-row:1 / span 2}
+.activity-group .activity-tile>strong{grid-column:2;grid-row:1;align-self:end}
+.activity-group .activity-tile>small{grid-column:2;grid-row:2;align-self:start;line-height:1.5}
+.activity-group .activity-tile>.mode-arrow{grid-column:3;grid-row:1 / span 2;align-self:center;justify-self:end;display:grid;place-items:center;flex:0 0 48px;width:48px;height:48px;margin:0;border:1px solid #9aac8e80;border-radius:50%;font:22px/1 system-ui;transition:transform .25s ease,background-color .25s,border-color .25s,box-shadow .25s}
+.activity-group .activity-tile:hover>.mode-arrow,.activity-group .activity-tile:focus-visible>.mode-arrow{transform:translateX(4px)}
+.activity-group>.daily-card{min-height:120px}
+.activity-group>.daily-card>.mode-arrow{flex:0 0 48px;width:48px;height:48px;margin:0}
+.activity-group>.activity-track>summary{display:grid;grid-template-columns:28px minmax(0,1fr) auto;align-items:center;justify-content:initial;gap:10px;padding:8px 0;list-style:none}
+.activity-group>.activity-track>summary::-webkit-details-marker{display:none}
+.activity-group>.activity-track>summary::before{grid-column:1;grid-row:1}
+.activity-group>.activity-track>summary>span{grid-column:3;grid-row:1;white-space:nowrap}
+@media(max-width:760px){.activity-group>.activity-track{margin-top:18px}}
+@media(prefers-reduced-motion:reduce){.activity-group .activity-tile>.mode-arrow,.activity-group>.daily-card>.mode-arrow{transition:none}}
