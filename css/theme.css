@@ -160,3 +160,12 @@ html[data-theme="aristocrat"] .engine-review .analysis-table tbody tr[data-revie
 html[data-theme="aristocrat"] .engine-review .analysis-table tbody tr[data-review-index]:hover th,html[data-theme="aristocrat"] .engine-review .analysis-table tbody tr[data-review-index]:hover td,html[data-theme="aristocrat"] .engine-review .analysis-table tbody tr[data-review-index]:focus th,html[data-theme="aristocrat"] .engine-review .analysis-table tbody tr[data-review-index]:focus td{color:#fff0d0}
 html[data-theme="aristocrat"] .board:not(.has-3d) .square.legal:after{width:34%;height:34%;background:#ffe16b;border:2px solid #2b1b10;box-shadow:0 0 0 3px #ffe16b99,0 2px 5px #0009}
 html[data-theme="aristocrat"] .board:not(.has-3d) .square.capture-target:after{border:5px solid #ffe16b;box-shadow:0 0 0 2px #2b1b10}
+
+/* Subtle falling chess pieces: only inside the sign-in gate and aristocrat theme. */
+html[data-theme="aristocrat"] #auth-gate{isolation:isolate}
+html[data-theme="aristocrat"] #auth-gate .auth-chess-rain{position:absolute;inset:0;z-index:0;overflow:hidden;pointer-events:none}
+html[data-theme="aristocrat"] #auth-gate .auth-chess-rain span{position:absolute;top:-12vh;left:var(--piece-x);font:var(--piece-size)/1 'Segoe UI Symbol','Arial Unicode MS',serif;color:#d8b8755c;text-shadow:0 0 14px #d8a84a30;animation:auth-chess-fall var(--piece-duration) linear var(--piece-delay) infinite;will-change:transform,opacity}
+html[data-theme="aristocrat"] #auth-gate .auth-card{position:relative;z-index:1}
+@keyframes auth-chess-fall{0%{transform:translate3d(0,-8vh,0) rotate(-24deg);opacity:0}10%{opacity:.58}50%{transform:translate3d(var(--piece-drift),55vh,0) rotate(170deg);opacity:.48}90%{opacity:.3}100%{transform:translate3d(calc(var(--piece-drift) * -0.55),118vh,0) rotate(390deg);opacity:0}}
+@media(max-width:600px){html[data-theme="aristocrat"] #auth-gate .auth-chess-rain span:nth-child(n+15){display:none}html[data-theme="aristocrat"] #auth-gate .auth-chess-rain span{animation-duration:calc(var(--piece-duration) * 1.15)}}
+@media(prefers-reduced-motion:reduce){html[data-theme="aristocrat"] #auth-gate .auth-chess-rain{display:none}}
