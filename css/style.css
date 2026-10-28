@@ -342,3 +342,14 @@ html[data-theme="aristocrat"] .engine-progress,html[data-theme="aristocrat"] .op
 .activity-group>.daily-card{margin:20px 0 0}
 .activity-group>.daily-card+.activity-tile,.activity-group>.activity-tile+.activity-tile{margin-top:12px}
 @media(max-width:760px){.activity-group .activity-tile,.activity-group>.daily-card{height:140px;min-height:140px}.activity-group>.daily-card{margin-top:20px}}
+/* Treat expandable routes as full mode cards and keep their labels separate */
+#activities .activity-group>.activity-track{margin:12px 0 0;padding:0;border:1px solid #8e694b66;border-radius:14px;background:linear-gradient(135deg,#36271c,#1b130d);box-shadow:inset 0 1px #d6ad661f,0 8px 20px #0003;overflow:hidden}
+#activities .activity-group>.activity-track>summary{display:grid;grid-template-columns:minmax(0,1fr) auto auto;align-items:center;justify-content:initial;gap:18px;min-height:118px;padding:16px 18px;border:0;background:transparent;list-style:none}
+#activities .activity-group>.activity-track>summary::-webkit-details-marker{display:none}
+#activities .activity-group>.activity-track>summary::before{content:none;display:none}
+#activities .activity-group>.activity-track>summary>.activity-track-title{grid-column:1;grid-row:1;font-size:16px;font-weight:750;color:#f2e5cd;min-width:0}
+#activities .activity-group>.activity-track>summary>.activity-track-count{grid-column:2;grid-row:1;white-space:nowrap;color:#c0ab8c}
+#activities .activity-group>.activity-track>summary>.activity-track-toggle{grid-column:3;grid-row:1;display:inline-flex;align-items:center;gap:10px;color:#e3c58f;font-size:12px;font-weight:650;white-space:nowrap}
+#activities .activity-track .path{padding:0 14px 16px;margin-top:0}
+#activities .activity-track .path>.lesson{border-radius:12px}
+@media(max-width:760px){#activities .activity-group>.activity-track>summary{grid-template-columns:minmax(0,1fr) auto;gap:10px;min-height:112px;padding:14px}#activities .activity-group>.activity-track>summary>.activity-track-title{grid-column:1;grid-row:1}#activities .activity-group>.activity-track>summary>.activity-track-count{grid-column:2;grid-row:1}#activities .activity-group>.activity-track>summary>.activity-track-toggle{grid-column:1 / -1;grid-row:2;justify-self:end}}
