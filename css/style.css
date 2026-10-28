@@ -448,3 +448,11 @@ html[data-theme="aristocrat"] #activities .activity-group>.activity-track>summar
 html[data-theme="aristocrat"] #activities .activity-group>.activity-track>summary>.activity-track-toggle{color:#e3c58f}
 html[data-theme="aristocrat"] #activities .activity-track-toggle i{color:#f3d497;border-color:#ba8e4c99;background:linear-gradient(145deg,#90663340,#1d130d);box-shadow:inset 0 1px #f5d99926}
 @media(max-width:760px){#activities .activity-group>.activity-track>summary{grid-template-columns:minmax(0,1fr) auto;min-height:112px}#activities .activity-group>.activity-track>summary>.activity-track-title{grid-column:1 / -1}#activities .activity-group>.activity-track>summary>.activity-track-count{grid-column:1;justify-self:start;padding:0}#activities .activity-group>.activity-track>summary>.activity-track-toggle{grid-column:2;justify-self:end}}
+
+/* Use the site green palette for home-card arrows outside the aristocrat theme. */
+html:not([data-theme="aristocrat"]) #activities .activity-group .activity-tile>.mode-arrow,
+html:not([data-theme="aristocrat"]) #activities .activity-group>.daily-card>.mode-arrow{color:#f8f7ee;background:linear-gradient(145deg,#4b7658,#315a42);border-color:#416a4d;box-shadow:0 4px 12px #37664d30,inset 0 1px #ffffff28}
+html:not([data-theme="aristocrat"]) #activities .activity-group .activity-tile:hover>.mode-arrow,
+html:not([data-theme="aristocrat"]) #activities .activity-group .activity-tile:focus-visible>.mode-arrow,
+html:not([data-theme="aristocrat"]) #activities .activity-group>.daily-card:hover>.mode-arrow,
+html:not([data-theme="aristocrat"]) #activities .activity-group>.daily-card:focus-visible>.mode-arrow{color:#fff;background:linear-gradient(145deg,#5d8966,#37664d);border-color:#638451;box-shadow:0 0 0 5px #37664d20,0 5px 14px #37664d30}
