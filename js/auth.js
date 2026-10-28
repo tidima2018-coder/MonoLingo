@@ -15,10 +15,14 @@ document.documentElement.classList.add('auth-pending');
  function showGate(errorText=''){
   document.documentElement.classList.add('auth-pending');
   if(document.getElementById('auth-gate')){document.getElementById('auth-gate').hidden=false;return;}
-  const gate=el('section',{id:'auth-gate','aria-label':'Вход'}),card=el('div',{class:'auth-card'});
+  const gate=el('section',{id:'auth-gate','aria-label':'Вход'}),card=el('div',{class:'auth-card'}),themeButton=el('button',{class:'auth-theme-toggle',type:'button','aria-pressed':'false'});
+  themeButton.textContent=document.documentElement.dataset.theme==='aristocrat'?'☀ Обычная тема':'♛ Тема аристократа';
+  themeButton.onclick=()=>document.getElementById('theme-toggle')?.click();
+  card.append(themeButton);
   card.append(el('span',{class:'eyebrow'},'Ход вперёд'),el('h1',{},'Вход в аккаунт'),el('p',{},'Войди или создай аккаунт, чтобы сохранять прогресс на всех устройствах.'));
   const error=el('p',{class:'auth-error',role:'alert'});error.textContent=errorText;
-  const form=el('form',{id:'auth-form'}),usernameLabel=el('label',{for:'auth-username'},'Никнейм'),username=el('input',{id:'auth-username',name:'username',autocomplete:'nickname',maxlength:'32',required:'',hidden:''}),emailLabel=el('label',{for:'auth-email'},'Email'),email=el('input',{id:'auth-email',name:'email',type:'email',autocomplete:'email',required:''}),passwordLabel=el('label',{for:'auth-password'},'Пароль'),password=el('input',{id:'auth-password',name:'password',type:'password',autocomplete:'current-password',minlength:'8',required:''}),submit=el('button',{class:'primary',type:'submit'},'Войти'),toggle=el('button',{class:'auth-mode-toggle',type:'button'},'Создать аккаунт');
+  const form=el('form',{id:'auth-form'}),usernameLabel=el('label',{for:'auth-username'},'Никнейм'),username=el('input',{id:'auth-username',name:'username',autocomplete:'nickname',maxlength:'32',required:'',hidden:'','aria-label':'Никнейм'}),emailLabel=el('label',{for:'auth-email'},'Email'),email=el('input',{id:'auth-email',name:'email',type:'email',autocomplete:'email',required:''}),passwordLabel=el('label',{for:'auth-password'},'Пароль'),password=el('input',{id:'auth-password',name:'password',type:'password',autocomplete:'current-password',minlength:'8',required:''}),submit=el('button',{class:'primary',type:'submit'},'Войти'),toggle=el('button',{class:'auth-mode-toggle',type:'button'},'Создать аккаунт');
+  usernameLabel.hidden=true;
   form.append(usernameLabel,username,emailLabel,email,passwordLabel,password,submit,toggle);card.append(error,form);gate.append(card);document.body.append(gate);
   let registering=false;
   toggle.onclick=()=>{registering=!registering;username.hidden=!registering;username.required=registering;usernameLabel.hidden=!registering;password.autocomplete=registering?'new-password':'current-password';submit.textContent=registering?'Зарегистрироваться':'Войти';toggle.textContent=registering?'Уже есть аккаунт? Войти':'Создать аккаунт';error.textContent='';};

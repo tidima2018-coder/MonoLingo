@@ -112,3 +112,29 @@ html[data-piece-style] .board .square .coord,html[data-piece-style] .review-squa
 html[data-piece-style] .board .square.dark .coord,html[data-piece-style] .review-square.dark .coord{color:var(--chess-ink-dark,#f5e4cb)}
 html[data-piece-style] .review-square{background:var(--chess-cell-light,#756452)}html[data-piece-style] .review-square.dark{background:var(--chess-cell-dark,#302720)}
 .board-color-settings{border-top:1px solid var(--line)!important;padding-top:16px!important}.board-color-settings>.piece-color-inputs{margin-top:14px}.piece-color-inputs #board-apply-colors{margin-left:0}.piece-color-inputs #board-defaults{margin-left:auto}
+
+/* Theme switch on the sign-in screen */
+.auth-theme-toggle{display:block;margin:0 0 20px auto;padding:8px 13px;border-radius:30px;font-size:13px}
+html[data-theme="aristocrat"] #auth-gate{background:radial-gradient(ellipse at 20% 10%,#75552c66,transparent 45%),linear-gradient(135deg,#17110d,#24180f 55%,#120e0a)}
+html[data-theme="aristocrat"] .auth-card{color:#f2e5cd;background:linear-gradient(145deg,#2d2118f5,#19120df5);border:1px solid #a27c4666;box-shadow:0 28px 90px #0008,inset 0 1px #f0d49b18}
+html[data-theme="aristocrat"] .auth-card h1{color:#f6e6ca;text-shadow:0 3px 22px #0009}
+html[data-theme="aristocrat"] .auth-card p{color:#cdbb9d}
+html .auth-card .auth-error{color:#b42318}
+html[data-theme="aristocrat"] .auth-card .auth-error{color:#ff766d}
+html[data-theme="aristocrat"] .auth-card label{color:#e6d3b2}
+html[data-theme="aristocrat"] .auth-card input{color:#f5ead7;background:#211811;border-color:#765a39}
+html[data-theme="aristocrat"] .auth-card input:focus{outline-color:#d2ab69;border-color:#d2ab69}
+html[data-theme="aristocrat"] .auth-card .auth-theme-toggle,html[data-theme="aristocrat"] .auth-card .auth-mode-toggle{background:linear-gradient(145deg,#38291d,#21180f);color:#edd6af;border:1px solid #8b673c}
+html[data-theme="aristocrat"] .auth-card .auth-theme-toggle:hover,html[data-theme="aristocrat"] .auth-card .auth-mode-toggle:hover{background:linear-gradient(145deg,#594024,#332116)}
+
+/* Admin page contrast and spacing in the aristocrat theme */
+.admin-page>.small{display:block;width:max-content;margin-bottom:18px}
+.admin-page>.eyebrow{display:block;margin-bottom:4px}
+html[data-theme="aristocrat"] .table-wrap{background:linear-gradient(145deg,#2c2119f5,#1b140ff5);border-color:#8b673c80;box-shadow:0 12px 32px #0004}
+html[data-theme="aristocrat"] .table-wrap th{background:#3a2b1e;color:#e8cc99;border-color:#79593480}
+html[data-theme="aristocrat"] .table-wrap td{color:#f2e5cd;border-color:#79593480}
+html[data-theme="aristocrat"] .review-card{background:linear-gradient(145deg,#2c2119f5,#1b140ff5);border-color:#8b673c80;box-shadow:0 10px 28px #0003}
+html[data-theme="aristocrat"] .review-card p{color:#d2bea0}
+html[data-theme="aristocrat"] .review-card time{color:#c0ab8c}
+html[data-theme="aristocrat"] .admin-page h2{color:#f2e5cd}
+@media(max-width:760px){.admin-page>.small{margin-bottom:12px}.admin-page>.eyebrow{margin-top:0}}
