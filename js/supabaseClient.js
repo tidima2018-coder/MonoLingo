@@ -7,8 +7,9 @@
  function requireClient(){if(!client)throw new Error('Укажи Project URL и Publishable key в js/supabaseClient.js.');return client;}
  async function profileFor(userId){
   const sb=requireClient();
-  const {data:{user},error:authError}=await sb.auth.getUser();
+  const {data:{session},error:authError}=await sb.auth.getSession();
   if(authError)throw authError;
+  const user=session?.user;
   if(!user||user.id!==userId)throw new Error('Нет доступа к этому профилю.');
   const {data:existing,error}=await sb.from('profiles').select('*').eq('id',user.id).maybeSingle();
   if(error)throw error;
@@ -27,7 +28,7 @@
  async function signUp(email,password,username){const clean=String(username||'').trim();if(clean.length<1||clean.length>32)throw new Error('Никнейм должен содержать от 1 до 32 символов.');const {data,error}=await requireClient().auth.signUp({email:String(email).trim(),password,options:{data:{username:clean}}});if(error)throw error;return data;}
  async function signIn(email,password){const {data,error}=await requireClient().auth.signInWithPassword({email:String(email).trim(),password});if(error)throw error;return data;}
  async function signOut(){const {error}=await requireClient().auth.signOut();if(error)throw error;}
- async function getCurrentUser(){const {data,error}=await requireClient().auth.getUser();if(error&&error.name!=='AuthSessionMissingError')throw error;return data.user||null;}
+ async function getCurrentUser(){const {data,error}=await requireClient().auth.getSession();if(error)throw error;return data.session?.user||null;}
  async function updateGameStats(result){if(!['win','loss','draw'].includes(result))throw new Error('Неизвестный результат партии.');const {error}=await requireClient().rpc('record_game_result',{p_result:result});if(error)throw error;await refreshProfile();}
  async function incrementSolvedPuzzles(xpGained,puzzleId){if(!Number.isInteger(xpGained)||xpGained<0||xpGained>100)throw new Error('Некорректное количество XP.');if(typeof puzzleId!=='string'||!puzzleId.trim())throw new Error('Не указан идентификатор задачи.');const {data,error}=await requireClient().rpc('record_puzzle_solved',{p_puzzle_id:puzzleId,p_xp_gained:xpGained});if(error)throw error;await refreshProfile();return data;}
  async function saveProgress(progress){const {error}=await requireClient().rpc('sync_profile_progress',{p_completed_stages:progress.completed,p_daily_dates:progress.dailyDates,p_daily_streak:progress.dailyStreak,p_last_daily_date:progress.lastDailyDate,p_legacy_wins:progress.wins});if(error)throw error;}

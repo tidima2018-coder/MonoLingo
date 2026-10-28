@@ -2,7 +2,7 @@
 document.documentElement.classList.add('auth-pending');
 (() => {
  const api=window.SupabaseApp;
- let profile=null,ready=false,syncTimer=0;
+ let profile=null,ready=false,syncTimer=0,authCheckActive=true;
  const el=(tag,attrs={},text='')=>{const node=document.createElement(tag);for(const [key,value] of Object.entries(attrs))node.setAttribute(key,value);if(text)node.textContent=text;return node;};
  const message=error=>{
   const raw=String(error?.message||''),code=String(error?.code||'');
@@ -26,7 +26,7 @@ document.documentElement.classList.add('auth-pending');
   form.append(usernameLabel,username,emailLabel,email,passwordLabel,password,submit,toggle);card.append(error,form);gate.append(card);document.body.append(gate);
   let registering=false;
   toggle.onclick=()=>{registering=!registering;username.hidden=!registering;username.required=registering;usernameLabel.hidden=!registering;password.autocomplete=registering?'new-password':'current-password';submit.textContent=registering?'Зарегистрироваться':'Войти';toggle.textContent=registering?'Уже есть аккаунт? Войти':'Создать аккаунт';error.textContent='';};
-  form.onsubmit=async event=>{event.preventDefault();submit.disabled=true;error.textContent='';try{const result=registering?await api.signUp(email.value,password.value,username.value):await api.signIn(email.value,password.value);if(registering&&!result.session){error.textContent='Аккаунт создан. Подтверди email по ссылке из письма, затем войди.';toggle.click();return;}location.reload();}catch(exception){error.textContent=message(exception);}finally{submit.disabled=false;}};
+  form.onsubmit=async event=>{event.preventDefault();authCheckActive=false;submit.disabled=true;error.textContent='';try{const result=registering?await api.signUp(email.value,password.value,username.value):await api.signIn(email.value,password.value);if(registering&&!result.session){error.textContent='Аккаунт создан. Подтверди email по ссылке из письма, затем войди.';toggle.click();return;}location.reload();}catch(exception){error.textContent=message(exception);}finally{submit.disabled=false;}};
  }
  function openReviewDialog(){
   let dialog=document.getElementById('review-dialog');if(dialog){dialog.showModal();return;}
@@ -46,7 +46,7 @@ document.documentElement.classList.add('auth-pending');
   ready=true;addAccountControls();window.dispatchEvent(new CustomEvent('supabase-profile-loaded',{detail:{profile}}));document.documentElement.classList.remove('auth-pending');if(location.pathname.endsWith('/admin.html'))window.dispatchEvent(new CustomEvent('supabase-admin-ready',{detail:{profile}}));scheduleProgressSync();return true;
  }
  function scheduleProgressSync(){if(!ready||!window.App?.getProgressSnapshot)return;clearTimeout(syncTimer);syncTimer=setTimeout(async()=>{try{await api.saveProgress(window.App.getProgressSnapshot());}catch(error){console.error('Не удалось сохранить прогресс в Supabase:',error);document.dispatchEvent(new CustomEvent('cloud-sync-error',{detail:{message:message(error)}}));}},250);}
- async function start(){if(!api?.configured||!api.client){showGate('Подключи Supabase: заполни Project URL и Publishable key в js/supabaseClient.js.');return;}showGate('Проверяем сессию…');document.querySelectorAll('#auth-form input,#auth-form button').forEach(control=>control.disabled=true);try{const user=await api.getCurrentUser();if(!user){showGate();return;}await loadProfile(user);}catch(error){showGate(message(error));}}
+ async function start(){if(!api?.configured||!api.client){showGate('Подключи Supabase: заполни Project URL и Publishable key в js/supabaseClient.js.');return;}showGate();try{const user=await api.getCurrentUser();if(!authCheckActive)return;if(!user)return;await loadProfile(user);}catch(error){if(authCheckActive)showGate(message(error));}}
  document.addEventListener('app-progress-change',scheduleProgressSync);document.addEventListener('DOMContentLoaded',start,{once:true});
  api?.client?.auth.onAuthStateChange(event=>{if(event==='SIGNED_OUT'){ready=false;showGate();}});
  window.SupabaseAuth={get profile(){return profile;},get ready(){return ready;}};
