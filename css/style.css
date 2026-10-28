@@ -359,3 +359,16 @@ html[data-theme="aristocrat"] .engine-progress,html[data-theme="aristocrat"] .op
 .site-nav{display:none!important}
 
 #admin-access[open]{width:min(calc(100vw - 32px),620px);max-width:620px;max-height:calc(100vh - 32px);overflow:auto;margin:auto}
+
+/* Keep the route title and completion counter in separate, shrinkable grid cells. */
+#activities .activity-group,
+#activities .activity-group>.activity-track,
+#activities .activity-group>.activity-track>summary{min-width:0}
+#activities .activity-group>.activity-track>summary>.activity-track-title{overflow-wrap:anywhere;line-height:1.35;padding-right:8px}
+#activities .activity-group>.activity-track>summary>.activity-track-count{justify-self:end;margin-left:8px;font-variant-numeric:tabular-nums}
+@media(max-width:760px){
+ #activities .activity-group>.activity-track>summary{grid-template-columns:minmax(0,1fr) auto;row-gap:8px}
+ #activities .activity-group>.activity-track>summary>.activity-track-title{grid-column:1 / -1;grid-row:1}
+ #activities .activity-group>.activity-track>summary>.activity-track-count{grid-column:1;grid-row:2;justify-self:start;margin-left:0}
+ #activities .activity-group>.activity-track>summary>.activity-track-toggle{grid-column:2;grid-row:2}
+}
