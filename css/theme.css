@@ -158,3 +158,5 @@ html[data-theme="aristocrat"] .engine-review .analysis-table thead th{color:#f1d
 html[data-theme="aristocrat"] .engine-review .analysis-table tbody tr:nth-child(even){background:#ffffff08}
 html[data-theme="aristocrat"] .engine-review .analysis-table tbody tr[data-review-index]:hover,html[data-theme="aristocrat"] .engine-review .analysis-table tbody tr[data-review-index]:focus{background:#6d4b2d;color:#fff0d0;outline:1px solid #d2ab69}
 html[data-theme="aristocrat"] .engine-review .analysis-table tbody tr[data-review-index]:hover th,html[data-theme="aristocrat"] .engine-review .analysis-table tbody tr[data-review-index]:hover td,html[data-theme="aristocrat"] .engine-review .analysis-table tbody tr[data-review-index]:focus th,html[data-theme="aristocrat"] .engine-review .analysis-table tbody tr[data-review-index]:focus td{color:#fff0d0}
+html[data-theme="aristocrat"] .board:not(.has-3d) .square.legal:after{width:34%;height:34%;background:#ffe16b;border:2px solid #2b1b10;box-shadow:0 0 0 3px #ffe16b99,0 2px 5px #0009}
+html[data-theme="aristocrat"] .board:not(.has-3d) .square.capture-target:after{border:5px solid #ffe16b;box-shadow:0 0 0 2px #2b1b10}
