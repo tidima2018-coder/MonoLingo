@@ -14,7 +14,7 @@ document.documentElement.classList.add('auth-pending');
  };
  function showGate(errorText=''){
   document.documentElement.classList.add('auth-pending');
-  if(document.getElementById('auth-gate')){document.getElementById('auth-gate').hidden=false;return;}
+  if(document.getElementById('auth-gate')){document.getElementById('auth-gate').hidden=false;const existingError=document.querySelector('.auth-error');if(existingError)existingError.textContent=errorText;document.querySelectorAll('#auth-form input,#auth-form button').forEach(control=>control.disabled=false);return;}
   const gate=el('section',{id:'auth-gate','aria-label':'Вход'}),card=el('div',{class:'auth-card'}),themeButton=el('button',{class:'auth-theme-toggle',type:'button','aria-pressed':'false'});
   themeButton.textContent=document.documentElement.dataset.theme==='aristocrat'?'☀ Обычная тема':'♛ Тема аристократа';
   themeButton.onclick=()=>document.getElementById('theme-toggle')?.click();
@@ -46,7 +46,7 @@ document.documentElement.classList.add('auth-pending');
   ready=true;addAccountControls();window.dispatchEvent(new CustomEvent('supabase-profile-loaded',{detail:{profile}}));document.documentElement.classList.remove('auth-pending');if(location.pathname.endsWith('/admin.html'))window.dispatchEvent(new CustomEvent('supabase-admin-ready',{detail:{profile}}));scheduleProgressSync();return true;
  }
  function scheduleProgressSync(){if(!ready||!window.App?.getProgressSnapshot)return;clearTimeout(syncTimer);syncTimer=setTimeout(async()=>{try{await api.saveProgress(window.App.getProgressSnapshot());}catch(error){console.error('Не удалось сохранить прогресс в Supabase:',error);document.dispatchEvent(new CustomEvent('cloud-sync-error',{detail:{message:message(error)}}));}},250);}
- async function start(){if(!api?.configured||!api.client){showGate('Подключи Supabase: заполни Project URL и Publishable key в js/supabaseClient.js.');return;}try{const user=await api.getCurrentUser();if(!user){showGate();return;}await loadProfile(user);}catch(error){showGate(message(error));}}
+ async function start(){if(!api?.configured||!api.client){showGate('Подключи Supabase: заполни Project URL и Publishable key в js/supabaseClient.js.');return;}showGate('Проверяем сессию…');document.querySelectorAll('#auth-form input,#auth-form button').forEach(control=>control.disabled=true);try{const user=await api.getCurrentUser();if(!user){showGate();return;}await loadProfile(user);}catch(error){showGate(message(error));}}
  document.addEventListener('app-progress-change',scheduleProgressSync);document.addEventListener('DOMContentLoaded',start,{once:true});
  api?.client?.auth.onAuthStateChange(event=>{if(event==='SIGNED_OUT'){ready=false;showGate();}});
  window.SupabaseAuth={get profile(){return profile;},get ready(){return ready;}};

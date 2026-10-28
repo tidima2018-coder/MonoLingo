@@ -93,6 +93,27 @@ header{animation:ui-arrive .45s ease-out both}main{animation:ui-arrive .5s ease-
 @media(max-width:760px){.mode-sidebar{position:static}.chapter-stages{padding-left:5px}.chapter-stages:before{left:27px}.chapter-stages .lesson{padding:12px;gap:9px}.lesson .step{width:38px;height:38px;font-size:19px}.lesson h3{font-size:15px}.lesson p{font-size:12px}.lesson-meta{font-size:9px}.locked-label{font-size:10px;padding:4px 6px}.chapter-heading{padding:14px}.chapter-heading h3{font-size:18px}.mode-card{padding:18px}.lesson .button{white-space:nowrap}.chapter-stages .lesson .button{font-size:12px;padding:8px}.layout>section{min-width:0}}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}button:not(.square):hover,.button:hover,button:active,.button:active,.mode-card:hover{transform:none}}
 
+/* Align practice routes and make stage disclosure clear */
+.activity-hub{align-items:stretch}
+.activity-group{display:flex;flex-direction:column}
+.activity-group>.activity-track{margin-top:auto;padding-top:13px}
+.activity-tiles .activity-tile,.activity-group>.activity-tile,.activity-group>.daily-card{min-height:120px}
+.activity-track>summary{list-style:none;align-items:center;padding:8px 0}
+.activity-track>summary::-webkit-details-marker{display:none}
+.activity-track>summary::before{content:'⌄';display:grid;place-items:center;flex:0 0 24px;width:24px;height:24px;border:1px solid currentColor;border-radius:50%;font-size:18px;line-height:1;transition:transform .25s ease,background-color .2s,color .2s}
+.activity-track[open]>summary::before{transform:rotate(180deg)}
+.activity-track>summary:hover::before,.activity-track>summary:focus-visible::before{background:var(--green);color:#fff;border-color:var(--green)}
+@media(max-width:760px){.activity-group>.activity-track{margin-top:18px}}
+@media(prefers-reduced-motion:reduce){.activity-track>summary::before{transition:none}}
+.activity-group>.activity-tile{grid-template-columns:44px minmax(0,1fr) 48px;padding-right:17px}
+.activity-group>.activity-tile>.mode-arrow{grid-column:3;grid-row:1 / span 2;display:grid;place-items:center;width:48px;height:48px;margin:0;border:1px solid #9aac8e80;border-radius:50%;font-size:22px;line-height:1;color:var(--green);background:#fffefa30;transition:transform .28s cubic-bezier(.2,.8,.2,1),background-color .28s,border-color .28s,box-shadow .28s}
+.activity-group>.activity-tile:hover>.mode-arrow,.activity-group>.activity-tile:focus-visible>.mode-arrow{transform:translateX(5px);background:#e7edda;border-color:#819876;box-shadow:0 0 0 5px #9aac8e1c}
+html[data-theme="aristocrat"] .activity-group>.activity-tile>.mode-arrow{color:#f3d497;border-color:#ba8e4c99;background:linear-gradient(135deg,#90663340,#1d130d);box-shadow:inset 0 1px #f5d99926}
+html[data-theme="aristocrat"] .activity-group>.activity-tile:hover>.mode-arrow,html[data-theme="aristocrat"] .activity-group>.activity-tile:focus-visible>.mode-arrow{color:#fff0cc;background:#76512d;border-color:#edc782;box-shadow:0 0 0 5px #d6a34b26}
+.activity-group>.daily-card .mode-arrow{transition:transform .28s cubic-bezier(.2,.8,.2,1),background-color .28s,border-color .28s,box-shadow .28s}
+.activity-group>.daily-card:hover .mode-arrow,.activity-group>.daily-card:focus-visible .mode-arrow{transform:translateX(5px);box-shadow:0 0 0 5px #d4b47724}
+@media(prefers-reduced-motion:reduce){.activity-group>.activity-tile>.mode-arrow,.activity-group>.daily-card .mode-arrow{transition:none}}
+
 /* Release entrance transforms so fixed notifications stay anchored to the viewport. */
 main,.card,.panel,.mode-card,.chapter-heading{animation-fill-mode:backwards}
 
