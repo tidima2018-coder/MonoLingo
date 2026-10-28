@@ -409,3 +409,25 @@ html[data-theme="aristocrat"] .site-guide-tip{background:#39291d;color:#ecd8b4;b
 #activities .activity-track-toggle .track-close-label{display:none}
 #activities .activity-group>.activity-track>summary>.activity-track-count{transform:translateX(12px)}
 @media(max-width:760px){#activities .activity-group>.activity-track>summary>.activity-track-count{transform:translateX(8px)}}
+
+.site-guide-trigger{padding:8px 14px;font-size:14px;line-height:1.35}
+.site-tour-shade{position:fixed;z-index:10000;background:#080604b8;pointer-events:none;transition:all .28s ease}
+.site-tour{position:fixed;z-index:10002;left:16px;top:16px;width:min(380px,calc(100vw - 32px));max-height:calc(100dvh - 24px);overflow:auto;padding:20px;border:1px solid #c8a568;border-radius:16px;background:linear-gradient(145deg,#fffdf8,#f1eee4);color:#29251e;box-shadow:0 18px 60px #0008}
+.site-tour[hidden],.site-tour-shade[hidden]{display:none!important}
+.site-tour-target{outline:3px solid #e8bd67!important;outline-offset:5px!important;filter:brightness(1.12);border-radius:12px!important;transition:outline-color .2s,box-shadow .2s}
+.site-tour-top,.site-tour-controls{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.site-tour-top .eyebrow{margin:0}
+.site-tour-close{width:36px;height:36px;padding:0;border-radius:50%;font-size:22px;line-height:1}
+.site-tour-count{display:block;margin-top:8px;color:#84755d;font-size:12px;font-weight:750;letter-spacing:.04em}
+.site-tour h2{margin:6px 0 10px;font:600 clamp(22px,5vw,28px)/1.2 Georgia,'Times New Roman',serif}
+.site-tour-description{margin:0 0 14px;color:#665b49;line-height:1.6}
+.site-tour-tip{margin:0;padding:10px 12px;border-left:3px solid #be9650;border-radius:0 8px 8px 0;background:#f2ead8;color:#4c3c23;font-size:13px;line-height:1.55}
+.site-tour-controls{margin-top:16px}
+.site-tour-controls button{padding:8px 12px;font-size:14px}
+.site-tour-controls .site-tour-prev{margin-right:auto}
+.site-tour.is-changing{animation:guide-arrive .24s ease-out both}
+html[data-theme="aristocrat"] .site-tour{border-color:#9b7541;background:linear-gradient(145deg,#302219,#1b130e);color:#f2e5cd}
+html[data-theme="aristocrat"] .site-tour-count,html[data-theme="aristocrat"] .site-tour-description{color:#c8b696}
+html[data-theme="aristocrat"] .site-tour-tip{background:#44311f;color:#f0dbb5;border-color:#d1a858}
+@media(max-width:520px){.site-tour{padding:16px}.site-tour h2{font-size:22px}.site-tour-description{font-size:14px}}
+@media(prefers-reduced-motion:reduce){.site-tour-shade,.site-tour-target{transition:none}.site-tour.is-changing{animation:none}}
