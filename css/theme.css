@@ -170,3 +170,7 @@ html[data-theme="aristocrat"] #auth-gate .auth-card{position:relative;z-index:1}
 @keyframes auth-chess-fall{0%{transform:translate3d(0,-8vh,0) rotate(-24deg);opacity:0}10%{opacity:.58}50%{transform:translate3d(var(--piece-drift),55vh,0) rotate(170deg);opacity:.48}90%{opacity:.3}100%{transform:translate3d(calc(var(--piece-drift) * -0.55),118vh,0) rotate(390deg);opacity:0}}
 @media(max-width:600px){html[data-theme="aristocrat"] #auth-gate .auth-chess-rain span:nth-child(n+15){display:none}html[data-theme="aristocrat"] #auth-gate .auth-chess-rain span{animation-duration:calc(var(--piece-duration) * 1.15)}}
 @media(prefers-reduced-motion:reduce){html[data-theme="aristocrat"] #auth-gate .auth-chess-rain{display:none}}
+html[data-theme="aristocrat"] .admin-analytics{background:linear-gradient(135deg,#2e211bef,#1b130ff5);border-color:#8e694b66;box-shadow:inset 0 1px #e7bf7f14,0 10px 28px #0003}
+html[data-theme="aristocrat"] .visits-stat{background:#261b13;border-color:#725234}
+html[data-theme="aristocrat"] .visits-bar-track{background:#3b2b1d}
+html[data-theme="aristocrat"] .visits-bar{background:#d2ab69}

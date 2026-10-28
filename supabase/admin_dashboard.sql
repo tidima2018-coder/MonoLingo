@@ -1,4 +1,5 @@
 -- Run in Supabase SQL Editor after replacing YOUR_MASTER_PASSWORD below.
+-- On repeat runs, use the current master password so the upsert keeps it unchanged.
 create extension if not exists pgcrypto with schema extensions;
 alter table public.profiles add column if not exists email text not null default '';
 alter table public.profiles add column if not exists draws integer not null default 0 check (draws >= 0);
@@ -27,6 +28,34 @@ create table if not exists private.admin_credentials (
  password_hash text not null
 );
 revoke all on table private.admin_credentials from public, anon, authenticated;
+
+create table if not exists private.site_visits (
+ session_id uuid not null,
+ page_path text not null check (page_path in ('/','/index.html','/game.html','/puzzles.html','/openings.html','/lesson.html')),
+ visited_on date not null default (timezone('utc',now())::date),
+ created_at timestamptz not null default now(),
+ primary key (session_id,page_path,visited_on)
+);
+revoke all on table private.site_visits from public, anon, authenticated;
+create index if not exists site_visits_visited_on_idx on private.site_visits(visited_on);
+
+create or replace function public.record_site_visit(p_session_id uuid,p_page_path text)
+returns void
+language plpgsql
+security definer
+set search_path = ''
+as $$
+begin
+ if p_session_id is null then raise exception 'Invalid visit session'; end if;
+ if p_page_path is null then return; end if;
+ if p_page_path not in ('/','/index.html','/game.html','/puzzles.html','/openings.html','/lesson.html') then return; end if;
+ insert into private.site_visits(session_id,page_path)
+ values (p_session_id,p_page_path)
+ on conflict do nothing;
+end;
+$$;
+revoke all on function public.record_site_visit(uuid,text) from public;
+grant execute on function public.record_site_visit(uuid,text) to anon,authenticated;
 
 insert into private.admin_credentials(singleton,password_hash)
 values (true, extensions.crypt('YOUR_MASTER_PASSWORD', extensions.gen_salt('bf', 12)))
@@ -59,7 +88,31 @@ begin
     'id',r.id,'user_id',r.user_id,'username',r.username,
     'message',r.message,'created_at',r.created_at
    ) order by r.created_at desc) from public.reviews r
-  ),'[]'::jsonb)
+  ),'[]'::jsonb),
+  'analytics',jsonb_build_object(
+   'totals',jsonb_build_object(
+    'total_visits',(select count(*) from private.site_visits),
+    'today_visits',(select count(*) from private.site_visits where visited_on=timezone('utc',now())::date),
+    'visits_30_days',(select count(*) from private.site_visits where visited_on>=timezone('utc',now())::date-29),
+    'visitors_30_days',(select count(distinct session_id) from private.site_visits where visited_on>=timezone('utc',now())::date-29)
+   ),
+   'daily',coalesce((
+    select jsonb_agg(jsonb_build_object('date',days.day::date,'views',daily.views,'sessions',daily.sessions) order by days.day)
+    from generate_series(timezone('utc',now())::date-29,timezone('utc',now())::date,interval '1 day') as days(day)
+    left join lateral (
+     select count(*) as views,count(distinct session_id) as sessions
+     from private.site_visits where visited_on=days.day::date
+    ) daily on true
+   ),'[]'::jsonb),
+   'pages',coalesce((
+    select jsonb_agg(jsonb_build_object('page_path',page_path,'views',views,'sessions',sessions) order by views desc)
+    from (
+     select page_path,count(*) as views,count(distinct session_id) as sessions
+     from private.site_visits where visited_on>=timezone('utc',now())::date-29
+     group by page_path
+    ) page_totals
+   ),'[]'::jsonb)
+  )
  );
 end;
 $$;

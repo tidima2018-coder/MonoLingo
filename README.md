@@ -48,8 +48,8 @@ Stockfish.js распространяется по GNU GPL v3. Полный те
 1. Создайте проект Supabase. В js/supabaseClient.js замените значение SUPABASE_URL на Project URL, а SUPABASE_PUBLISHABLE_KEY — на Publishable key (может называться anon/public key в старом интерфейсе). Эти значения предназначены для браузера; секретный service_role ключ сюда не вставляйте.
 2. В Supabase Dashboard откройте SQL Editor и выполните весь файл supabase/schema.sql. Он создаёт профиль при регистрации, RLS-политики и RPC для счётчиков, XP и синхронизации прогресса.
 3. В Authentication → URL Configuration добавьте адрес публикации https://monolingo.sitevo.kz и адрес локальной разработки, например http://localhost:8000. Настройте подтверждение email по своему выбору.
-4. В Supabase SQL Editor выполни supabase/admin_dashboard.sql, заменив YOUR_MASTER_PASSWORD на мастер-пароль перед запуском. CLI и Edge Function не нужны.
+4. В Supabase SQL Editor выполни supabase/admin_dashboard.sql, заменив YOUR_MASTER_PASSWORD на мастер-пароль перед запуском. При обновлении аналитики выполни этот файл повторно и укажи тот же мастер-пароль, чтобы пароль не изменился. CLI и Edge Function не нужны.
 5. Запусти HTML-сайт через HTTPS и войди в аккаунт; открытие admin.html попросит мастер-пароль.
-6. Войди в приложение и открой admin.html; данные появятся после ввода мастер-пароля.
+6. Войди в приложение и открой admin.html; данные появятся после ввода мастер-пароля. Учёт посещений показывает уникальные просмотры страниц для случайной вкладочной сессии; IP-адреса, email и URL-параметры не сохраняются. Новые данные начинают собираться после применения обновлённого supabase/admin_dashboard.sql.
 
 Готовые файлы для настройки: supabase/schema.sql, js/supabaseClient.js. При первом запуске замените два клиентских значения Supabase; остальные изменения ключей не требуют.
