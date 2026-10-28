@@ -403,3 +403,9 @@ html[data-theme="aristocrat"] .site-guide-tip{background:#39291d;color:#ecd8b4;b
  #activities .activity-group>.activity-track>summary>.activity-track-count{grid-column:1;grid-row:2;justify-self:start;margin-left:0}
  #activities .activity-group>.activity-track>summary>.activity-track-toggle{grid-column:2;grid-row:2}
 }
+
+/* Compact route headers: keep the chevron, drop its repeated instruction text. */
+#activities .activity-track-toggle .track-open-label,
+#activities .activity-track-toggle .track-close-label{display:none}
+#activities .activity-group>.activity-track>summary>.activity-track-count{transform:translateX(12px)}
+@media(max-width:760px){#activities .activity-group>.activity-track>summary>.activity-track-count{transform:translateX(8px)}}
