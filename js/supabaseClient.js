@@ -1,7 +1,7 @@
 'use strict';
 (() => {
- const SUPABASE_URL='https://cbgzoyzyqmrptsenpyrr.supabase.co';
- const SUPABASE_PUBLISHABLE_KEY='sb_publishable_MysMDgxoFpnGB8WYDe6F9A_5zfbePIZ';
+ const SUPABASE_URL='https://hvzqflrngprlgageztzz.supabase.co';
+ const SUPABASE_PUBLISHABLE_KEY='sb_publishable_sHmULUjwuPNK49u2XuknJw_eE4WXZMW';
  const configured=!SUPABASE_URL.includes('YOUR_')&&!SUPABASE_PUBLISHABLE_KEY.includes('YOUR_');
  const client=configured&&window.supabase?.createClient?window.supabase.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY):null;
  function requireClient(){if(!client)throw new Error('Укажи Project URL и Publishable key в js/supabaseClient.js.');return client;}
@@ -37,6 +37,7 @@
  async function saveAccountData(value){const {data,error}=await requireClient().auth.updateUser({data:{chess_app_data:value}});if(error)throw error;return data.user;}
  async function sendReview(text){const message=String(text||'').trim();if(message.length<3||message.length>2000)throw new Error('Отзыв должен содержать от 3 до 2000 символов.');const user=await getCurrentUser();if(!user)throw new Error('Войди, чтобы оставить отзыв.');const profile=await profileFor(user.id);const {error}=await requireClient().from('reviews').insert({user_id:user.id,username:profile.username,message});if(error)throw error;}
  async function recordVisit(sessionId,pagePath){if(typeof sessionId!=='string'||!/^[0-9a-f-]{36}$/i.test(sessionId)||typeof pagePath!=='string')return;const {error}=await requireClient().rpc('record_site_visit',{p_session_id:sessionId,p_page_path:pagePath});if(error)throw error;}
- async function getAdminDashboard(password){const {data,error}=await requireClient().rpc('admin_dashboard',{p_password:password});if(error){if(error.message?.includes('Invalid master password'))throw new Error('Неверный мастер-пароль.');throw error;}return {users:data?.users||[],reviews:data?.reviews||[],analytics:data?.analytics||{}};}
- window.SupabaseApp={client,configured,signUp,signIn,signOut,getCurrentUser,profileFor,refreshProfile,startGame,updateGameStats,incrementSolvedPuzzles,saveProgress,saveOpeningProgress,saveAccountData,sendReview,recordVisit,getAdminDashboard};
+ async function getAdminDashboard(){const {data,error}=await requireClient().rpc('admin_dashboard');if(error)throw error;return {users:data?.users||[],reviews:data?.reviews||[],analytics:data?.analytics||{}};}
+ async function setAdminRole(userId,role){if(typeof userId!=='string'||!['admin','user'].includes(role))throw new Error('Некорректная роль.');const {data,error}=await requireClient().rpc('set_admin_role',{p_user_id:userId,p_role:role});if(error)throw error;return data;}
+ window.SupabaseApp={client,configured,signUp,signIn,signOut,getCurrentUser,profileFor,refreshProfile,startGame,updateGameStats,incrementSolvedPuzzles,saveProgress,saveOpeningProgress,saveAccountData,sendReview,recordVisit,getAdminDashboard,setAdminRole};
 })();
