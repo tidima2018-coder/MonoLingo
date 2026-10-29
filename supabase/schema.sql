@@ -108,6 +108,18 @@ grant select,insert on public.reviews to authenticated;
 revoke all on public.puzzle_completions from anon, authenticated;
 grant select on public.puzzle_completions to authenticated;
 
+create or replace function public.record_game_started()
+returns void
+language plpgsql
+security definer
+set search_path = ''
+as $$
+begin
+ if auth.uid() is null then raise exception 'Authentication required'; end if;
+ update public.profiles set games_played=games_played+1 where id=auth.uid();
+ if not found then raise exception 'Profile not found'; end if;
+end;
+$$;
 create or replace function public.record_game_result(p_result text)
 returns void
 language plpgsql
@@ -118,8 +130,7 @@ begin
  if auth.uid() is null then raise exception 'Authentication required'; end if;
  if p_result not in ('win','loss','draw') then raise exception 'Invalid game result'; end if;
  update public.profiles
- set games_played=games_played+1,
-     wins=wins+case when p_result='win' then 1 else 0 end,
+ set wins=wins+case when p_result='win' then 1 else 0 end,
      losses=losses+case when p_result='loss' then 1 else 0 end,
      draws=draws+case when p_result='draw' then 1 else 0 end
  where id=auth.uid();
@@ -188,6 +199,8 @@ $$;
 
 revoke all on function public.is_admin() from public, anon;
 grant execute on function public.is_admin() to authenticated;
+revoke all on function public.record_game_started() from public, anon;
+grant execute on function public.record_game_started() to authenticated;
 revoke all on function public.record_game_result(text) from public, anon;
 grant execute on function public.record_game_result(text) to authenticated;
 revoke all on function public.record_puzzle_solved(text,integer) from public, anon;
