@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="ru">
+<head>
+ <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#f5f4ed"><meta name="referrer" content="no-referrer">
+ <title>Подтверждение почты — MonoLingo</title>
+ <link rel="stylesheet" href="css/style.css?v=20261030-1"><link rel="stylesheet" href="css/theme.css?v=20261030-1">
+ <style>
+  .confirm-page{min-height:calc(100svh - 110px);display:grid;place-items:center;padding:32px 16px}.confirm-card{width:min(100%,520px);padding:clamp(24px,6vw,42px);border:1px solid var(--line);border-radius:24px;background:var(--card,#fffefa);box-shadow:0 24px 80px #1c30251c}.confirm-card h1{margin:8px 0 14px}.confirm-card p{line-height:1.65}.confirm-card .primary{display:inline-flex;margin-top:12px;text-decoration:none}.confirm-mark{display:grid;place-items:center;width:64px;height:64px;margin-bottom:18px;border-radius:50%;background:#e7edda;color:var(--green);font-size:30px}.confirm-status{min-height:26px;color:var(--muted)}.confirm-error{color:#a33b2d}#resend-form[hidden]{display:none!important}
+  html[data-theme="aristocrat"] .confirm-card{background:linear-gradient(145deg,#2a1e17,#19120f);border-color:#8e694b66}html[data-theme="aristocrat"] .confirm-mark{background:#42331f}
+ </style>
+ <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="js/supabaseClient.js?v=20261030-2"></script><script src="js/theme.js?v=20261028-15"></script>
+</head>
+<body>
+ <header><a class="brand" href="index.html">♞ MonoLingo</a><button id="theme-toggle" class="theme-toggle" type="button" aria-pressed="false">♛ Тема аристократа</button></header>
+ <main class="confirm-page"><section class="confirm-card" aria-labelledby="confirm-heading">
+  <span class="confirm-mark" aria-hidden="true">✉</span><span class="eyebrow">MonoLingo</span>
+  <h1 id="confirm-heading">Подтверди почту</h1>
+  <p id="confirm-message">Нажми кнопку ниже, чтобы подтвердить email и активировать аккаунт.</p>
+  <p id="confirm-status" class="confirm-status" role="status" aria-live="polite">Открытие страницы не подтверждает адрес автоматически.</p>
+  <button id="confirm-button" class="primary" type="button">Подтвердить почту</button>
+  <a id="login-button" class="primary" href="index.html" hidden>Войти</a>
+  <p id="confirm-retry" hidden>Ссылка недействительна или истекла. Укажи email, чтобы запросить новое письмо подтверждения.</p>
+  <form id="resend-form" hidden style="display:grid;gap:10px;margin:18px 0"><label for="resend-email">Email</label><input id="resend-email" type="email" autocomplete="email" required style="width:100%;padding:13px 15px;border:1px solid var(--line);border-radius:10px;background:var(--bg,#fff);color:var(--ink);font:inherit"><button class="primary" type="submit">Отправить новое письмо</button></form>
+  <p><a href="index.html">На главную</a></p>
+ </section></main>
+ <script src="js/confirm.js?v=20261030-1"></script>
+</body>
+</html>

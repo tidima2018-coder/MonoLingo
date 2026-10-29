@@ -1,0 +1,33 @@
+<!-- Supabase Authentication → Email Templates → Confirm signup -->
+<!-- Subject: Verify Your Email – MonoLingo -->
+<!doctype html>
+<html lang="en">
+<head>
+ <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+ <meta name="x-apple-disable-message-reformatting"><title>Verify Your Email – MonoLingo</title>
+ <style>
+  @media screen and (max-width:600px){.email-shell{width:100%!important}.email-card{padding:32px 24px!important}.email-title{font-size:30px!important}}
+ </style>
+</head>
+<body style="margin:0;padding:0;background:#f3f4ed;font-family:Arial,Helvetica,sans-serif;color:#233329">
+ <div style="display:none;max-height:0;overflow:hidden;opacity:0">Confirm your email address to activate your MonoLingo account.</div>
+ <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background:#f3f4ed">
+  <tr><td align="center" style="padding:40px 16px">
+   <table role="presentation" class="email-shell" width="560" cellspacing="0" cellpadding="0" border="0" style="width:560px;max-width:560px">
+    <tr><td align="center" style="padding:0 0 20px;color:#355443;font-size:18px;font-weight:bold;letter-spacing:.3px">♞ MonoLingo</td></tr>
+    <tr><td class="email-card" style="padding:44px 48px;background:#fffefa;border:1px solid #dfe4d8;border-radius:20px">
+     <div style="width:54px;height:54px;line-height:54px;text-align:center;border-radius:50%;background:#e8eee1;color:#355443;font-size:24px">✉</div>
+     <h1 class="email-title" style="margin:24px 0 14px;color:#233329;font-size:34px;line-height:1.2">Welcome to MonoLingo!</h1>
+     <p style="margin:0;color:#526157;font-size:16px;line-height:1.7">Thank you for joining MonoLingo! Please verify your email address to activate your account.</p>
+     <table role="presentation" cellspacing="0" cellpadding="0" border="0" style="margin:30px 0 26px"><tr><td align="center" bgcolor="#355443" style="border-radius:10px">
+      <a href="{{ .SiteURL }}/confirm.html?token_hash={{ .TokenHash }}&amp;type=email" style="display:inline-block;padding:15px 25px;border:1px solid #355443;border-radius:10px;color:#ffffff;font-size:16px;font-weight:bold;text-decoration:none">Confirm Email</a>
+     </td></tr></table>
+     <p style="margin:0;color:#718075;font-size:13px;line-height:1.6">If you did not create a MonoLingo account, you can ignore this email.</p>
+     <p style="margin:24px 0 0;color:#526157;font-size:15px;line-height:1.6">The MonoLingo Team</p>
+    </td></tr>
+    <tr><td align="center" style="padding:20px 10px;color:#7a857d;font-size:12px;line-height:1.5">MonoLingo · Learn chess one move at a time</td></tr>
+   </table>
+  </td></tr>
+ </table>
+</body>
+</html>
