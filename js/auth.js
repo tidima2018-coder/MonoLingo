@@ -54,8 +54,50 @@ document.documentElement.classList.add('auth-pending');
   let dialog=document.getElementById('friends-dialog');if(dialog){dialog.showModal();await friendsRenderer?.();return;}
   dialog=el('dialog',{id:'friends-dialog',class:'friends-dialog'});const wrap=el('section',{class:'friends-panel'});wrap.append(el('span',{class:'eyebrow'},'Социальная игра'),el('h2',{},'Друзья'));
   const status=el('p',{class:'friends-status',role:'status'}),label=el('label',{for:'friends-search'},'Найти по никнейму'),input=el('input',{id:'friends-search',type:'search',maxlength:'32',autocomplete:'off',placeholder:'Введите минимум 2 символа'}),results=el('div',{class:'friends-results'}),requests=el('section',{class:'friends-section'}),list=el('section',{class:'friends-section'}),close=el('button',{type:'button'},'Закрыть');close.onclick=()=>dialog.close();wrap.append(status,label,input,results,requests,list,close);dialog.append(wrap);document.body.append(dialog);
-  let searchTimer=0;input.oninput=()=>{clearTimeout(searchTimer);searchTimer=setTimeout(async()=>{results.replaceChildren();if(input.value.trim().length<2)return;try{for(const person of await api.searchUsers(input.value)){const row=el('div',{class:'friend-row'});row.append(el('span',{},person.username));const add=el('button',{type:'button',class:'compact'},'Добавить в друзья');add.onclick=async()=>{add.disabled=true;try{await api.friendRequest(person.user_id);status.textContent='Заявка отправлена.';await friendsRenderer();}catch(e){status.textContent=message(e);add.disabled=false;}};row.append(add);results.append(row);}}catch(e){status.textContent=message(e);}},250);};
-  friendsRenderer=async function(){try{const [incoming,friends]=await Promise.all([api.friendRequests(),api.friendList()]);requests.replaceChildren(el('h3',{},'Входящие заявки'+(incoming.length?' ('+incoming.length+')':'')));if(!incoming.length)requests.append(el('p',{class:'small'},'Новых заявок нет.'));for(const req of incoming){const row=el('div',{class:'friend-row'});row.append(el('span',{},req.username));for(const [accept,title] of [[true,'Принять'],[false,'Отклонить']]){const button=el('button',{type:'button',class:accept?'primary compact':'compact'},title);button.onclick=async()=>{button.disabled=true;try{await api.friendRespond(req.request_id,accept);await friendsRenderer();}catch(e){status.textContent=message(e);button.disabled=false;}};row.append(button);}requests.append(row);}list.replaceChildren(el('h3',{},'Мои друзья'));if(!friends.length)list.append(el('p',{class:'small'},'Пока никого нет.'));for(const friend of friends){const row=el('div',{class:'friend-row'});row.append(el('span',{class:'friend-name'},friend.username));const online=el('span',{class:'friend-presence','data-user-id':friend.user_id},'Проверяем…');row.append(online);const remove=el('button',{type:'button',class:'compact'},'Удалить');remove.onclick=async()=>{remove.disabled=true;try{await api.friendRemove(friend.user_id);await friendsRenderer();}catch(e){status.textContent=message(e);remove.disabled=false;}};row.append(remove);list.append(row);}refreshPresence(friends);}catch(e){status.textContent=message(e);}};
+  let searchTimer=0,searchSequence=0;
+  const friendError=e=>{
+   if(e?.code==='PGRST202')return 'Поисковая функция отсутствует в Supabase. Выполните supabase/friends_search_rpc.sql; если таблицы friend_directory ещё нет — сначала supabase/friends.sql. Затем обновите страницу.';
+   if(e?.code==='42501')return 'Supabase запретил действие политикой доступа. Проверьте, что friends.sql применён для таблицы friendships.';
+   const raw=String(e?.message||'');
+   if(raw.includes('Friend request already exists'))return 'Заявка уже отправлена или вы уже друзья.';
+   if(raw.includes('Friend request unavailable'))return 'Эта заявка уже обработана. Обновите список.';
+   if(raw==='Failed to fetch')return 'Не удалось подключиться к Supabase. Проверьте интернет и повторите попытку.';
+   return raw||'Не удалось выполнить действие. Повторите попытку.';
+  };
+  async function showSearchResults(query,sequence){
+   results.replaceChildren();
+   if(query.length<2){if(query)results.append(el('p',{class:'friends-search-hint'},'Введите ещё хотя бы один символ для поиска «'+query+'».'));return;}
+   results.append(el('p',{class:'friends-search-hint'},'Ищем ник «'+query+'»…'));
+   try{
+    const people=await api.searchUsers(query);if(sequence!==searchSequence)return;
+    if(!people.length){results.replaceChildren(el('p',{class:'friends-search-hint'},'Пользователь «'+query+'» не найден.'));return;}
+    const states=await Promise.all(people.map(async person=>{try{return await api.friendshipStatus(person.user_id);}catch(error){return null;}}));
+    if(sequence!==searchSequence)return;
+    results.replaceChildren(el('p',{class:'friends-search-hint'},'Результаты поиска по нику «'+query+'»:'));
+    people.forEach((person,index)=>{
+     const relation=states[index],row=el('div',{class:'friend-row friend-search-result'});
+     row.append(el('strong',{class:'friend-result-name'},person.username||'Игрок'));
+     let label='+ Добавить в друзья',disabled=false,acceptIncoming=false;
+     if(relation?.status==='accepted'){label='В друзьях';disabled=true;}
+     else if(relation?.status==='pending'&&relation.sent_by_me){label='Ожидает подтверждения';disabled=true;}
+     else if(relation?.status==='pending'){label='Принять заявку';acceptIncoming=true;}
+     const action=el('button',{type:'button',class:'compact friend-add-button'},label);action.disabled=disabled;
+     if(!disabled)action.onclick=async()=>{
+      action.disabled=true;
+      try{
+       if(acceptIncoming)await api.friendRespond(relation.friendship_id,true);
+       else await api.friendRequest(person.user_id);
+       status.textContent=acceptIncoming?'Заявка принята. Теперь вы друзья.':'Заявка отправлена. Ожидает подтверждения.';
+       const current=++searchSequence;await friendsRenderer();await showSearchResults(input.value.trim(),current);
+      }catch(error){action.disabled=false;status.textContent=friendError(error);if(String(error?.message||'').includes('already exists')){const current=++searchSequence;await showSearchResults(input.value.trim(),current);}}
+     };
+     row.append(action);results.append(row);
+    });
+    if(states.some((value,index)=>!value&&people[index].user_id)){const hint=el('p',{class:'friends-search-hint'},'Чтобы показывать текущий статус заявки, примените supabase/friends_status.sql в Supabase.');hint.classList.add('friends-setup-hint');results.append(hint);}
+   }catch(error){if(sequence!==searchSequence)return;results.replaceChildren(el('p',{class:'friends-search-hint'},friendError(error)));}
+  }
+  input.oninput=()=>{clearTimeout(searchTimer);const query=input.value.trim(),sequence=++searchSequence;results.replaceChildren();if(query.length<2){if(query)results.append(el('p',{class:'friends-search-hint'},'Введите ещё хотя бы один символ для поиска «'+query+'».'));return;}results.append(el('p',{class:'friends-search-hint'},'Ищем ник «'+query+'»…'));searchTimer=setTimeout(()=>showSearchResults(query,sequence),250);};
+  friendsRenderer=async function(){try{const [incoming,friends]=await Promise.all([api.friendRequests(),api.friendList()]);requests.replaceChildren(el('h3',{},'Входящие заявки'+(incoming.length?' ('+incoming.length+')':'')));if(!incoming.length)requests.append(el('p',{class:'small'},'Новых заявок нет.'));for(const req of incoming){const row=el('div',{class:'friend-row'});row.append(el('span',{},req.username));for(const [accept,title] of [[true,'Принять'],[false,'Отклонить']]){const button=el('button',{type:'button',class:accept?'primary compact':'compact'},title);button.onclick=async()=>{button.disabled=true;try{await api.friendRespond(req.request_id,accept);await friendsRenderer();}catch(e){status.textContent=friendError(e);button.disabled=false;}};row.append(button);}requests.append(row);}list.replaceChildren(el('h3',{},'Мои друзья'));if(!friends.length)list.append(el('p',{class:'small'},'Пока никого нет.'));for(const friend of friends){const row=el('div',{class:'friend-row'});row.append(el('span',{class:'friend-name'},friend.username));const online=el('span',{class:'friend-presence','data-user-id':friend.user_id},'Проверяем…');row.append(online);const remove=el('button',{type:'button',class:'compact'},'Удалить');remove.onclick=async()=>{remove.disabled=true;try{await api.friendRemove(friend.user_id);await friendsRenderer();}catch(e){status.textContent=friendError(e);remove.disabled=false;}};row.append(remove);list.append(row);}refreshPresence(friends);}catch(e){status.textContent=message(e);}};
   dialog.addEventListener('close',()=>{presenceChannels.forEach(ch=>api.client.removeChannel(ch));presenceChannels=[];});dialog.showModal();await friendsRenderer();
  }
  let presenceChannels=[];function refreshPresence(friends){presenceChannels.forEach(ch=>api.client.removeChannel(ch));presenceChannels=[];for(const friend of friends){const node=document.querySelector('.friend-presence[data-user-id="'+friend.user_id+'"]');if(!node)continue;const channel=api.client.channel('user:'+friend.user_id,{config:{private:true,presence:{key:friend.user_id}}});channel.on('presence',{event:'sync'},()=>{node.textContent=Object.keys(channel.presenceState()).length?'В сети':'Не в сети';node.classList.toggle('is-online',Object.keys(channel.presenceState()).length>0);});channel.subscribe();presenceChannels.push(channel);}}

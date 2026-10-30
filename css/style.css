@@ -462,3 +462,80 @@ html:not([data-theme="aristocrat"]) #activities .activity-group>.daily-card:focu
 .friends-dialog{width:min(calc(100% - 24px),620px);max-width:620px;max-height:90vh;padding:0;background:var(--bg)}.friends-panel{padding:24px}.friends-panel h2{margin:5px 0}.friends-panel input{width:100%;padding:12px;border:1px solid var(--line);border-radius:10px;background:#fff;font:inherit}.friends-status{min-height:24px}.friends-section{margin:18px 0}.friends-section h3{margin:8px 0}.friend-row{display:flex;align-items:center;gap:10px;padding:10px 0;border-top:1px solid var(--line)}.friend-row>span:first-child{flex:1;font-weight:650;overflow-wrap:anywhere}.friend-row .compact{white-space:nowrap}.friend-presence{font-size:12px;color:var(--muted);white-space:nowrap}.friend-presence:before{content:'';display:inline-block;width:8px;height:8px;margin-right:6px;border-radius:50%;background:#a4aaa4}.friend-presence.is-online{color:#315b43}.friend-presence.is-online:before{background:#55a36b}.friends-panel>button:last-child{margin-top:8px}@media(max-width:520px){.friends-panel{padding:18px}.friend-row{flex-wrap:wrap}.friend-row>span:first-child{flex-basis:100%}.friend-row .compact{padding:7px 9px;font-size:13px}}
 
 #friend-toast{position:fixed;right:20px;bottom:20px;z-index:11000;padding:12px 18px;border:1px solid var(--line);border-radius:12px;background:#fffefa;box-shadow:0 8px 24px #233b3220;opacity:0;transform:translateY(8px);pointer-events:none;transition:.2s}#friend-toast.friend-toast-visible{opacity:1;transform:translateY(0)}
+
+.friends-search-hint{margin:8px 0;color:var(--ink);font-size:14px}.friend-search-result{background:#fffefa;border-radius:10px;padding:10px 12px;margin-top:7px}.friend-result-name{display:block;flex:1;color:var(--ink);font-weight:750;overflow-wrap:anywhere}
+
+.friend-search-result{flex-wrap:wrap}.friend-add-button{min-width:190px}.friend-add-button:disabled{opacity:.82;color:var(--ink);background:#edf1e6;cursor:default}.friends-setup-hint{padding:8px 10px;border-left:3px solid #b98b34;background:#fff7e5;border-radius:4px}@media(max-width:520px){.friend-add-button{width:100%}}
+
+/* MonoLingo — Friends UI */
+
+.friends-dialog {
+    color: #f4e7d0;
+}
+
+html[data-theme="aristocrat"] .friends-dialog {
+    background: #25180f;
+    border: 1px solid #b68b4e;
+}
+
+html[data-theme="aristocrat"] .friends-panel input {
+    background: #332419;
+    color: #fff4df;
+    border: 1px solid #c59a56;
+    caret-color: #f0c77c;
+    font-size: 16px;
+}
+
+html[data-theme="aristocrat"] .friends-panel input::placeholder {
+    color: #ccb798;
+    opacity: 1;
+}
+
+html[data-theme="aristocrat"] .friends-panel input:focus {
+    outline: 2px solid #e8b95f;
+    outline-offset: 2px;
+}
+
+html[data-theme="aristocrat"] .friends-panel label,
+html[data-theme="aristocrat"] .friends-panel h2,
+html[data-theme="aristocrat"] .friends-panel h3,
+html[data-theme="aristocrat"] .friend-row {
+    color: #f4e7d0;
+}
+
+html[data-theme="aristocrat"] .friends-status,
+html[data-theme="aristocrat"] .friends-panel .small {
+    color: #e1c59b;
+}
+
+html[data-theme="aristocrat"] .friends-panel button {
+    background: #47301c;
+    color: #fff0d3;
+    border-color: #ba8f50;
+}
+
+html[data-theme="aristocrat"] .friends-panel button:hover {
+    background: #674526;
+}
+
+html[data-theme="aristocrat"] .friends-panel button:focus-visible {
+    outline: 2px solid #f0c77c;
+}
+
+html[data-theme="aristocrat"] .friends-panel button:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+}
+
+html:not([data-theme="aristocrat"]) .friends-dialog {
+    color: #233b32;
+}
+
+html:not([data-theme="aristocrat"]) .friends-panel input {
+    background: #ffffff;
+    color: #233b32;
+}
+
+html:not([data-theme="aristocrat"]) .friends-panel input::placeholder {
+    color: #66776d;
+}

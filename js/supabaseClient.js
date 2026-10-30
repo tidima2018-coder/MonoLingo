@@ -1,6 +1,6 @@
 'use strict';
 (() => {
- const SUPABASE_URL='https://hvzqflrngprlgageztzz.supabase.co';
+ const SUPABASE_URL='https://hvzqflrngprlgageztzz.supabase.co/rest/v1/  ';
  const SUPABASE_PUBLISHABLE_KEY='sb_publishable_sHmULUjwuPNK49u2XuknJw_eE4WXZMW';
  const configured=!SUPABASE_URL.includes('YOUR_')&&!SUPABASE_PUBLISHABLE_KEY.includes('YOUR_');
  const EMAIL_REQUEST_COOLDOWN_MS=60_000,EMAIL_REQUEST_COOLDOWN_KEY='monolingo-signup-email-last-request';
@@ -50,6 +50,7 @@
  async function friendRequest(userId){const {data,error}=await requireClient().rpc('send_friend_request',{p_target:userId});if(error)throw error;return data;}
  async function friendRespond(requestId,accept){const {data,error}=await requireClient().rpc('respond_friend_request',{p_request:requestId,p_accept:!!accept});if(error)throw error;return data;}
  async function friendRemove(userId){const {data,error}=await requireClient().rpc('remove_friend',{p_friend:userId});if(error)throw error;return data;}
+ async function friendshipStatus(userId){const {data,error}=await requireClient().rpc('friendship_status',{p_target:userId});if(error)throw error;return data?.[0]||{status:'none',sent_by_me:false};
  async function friendList(){const {data,error}=await requireClient().rpc('list_friends');if(error)throw error;return data||[];}
- async function friendRequests(){const {data,error}=await requireClient().rpc('list_friend_requests');if(error)throw error;return data||[];} window.SupabaseApp={client,configured,signUp,signIn,signOut,getCurrentUser,profileFor,refreshProfile,verifyEmailToken,resendSignupConfirmation,getSignupEmailCooldownSeconds,startGame,updateGameStats,incrementSolvedPuzzles,saveProgress,saveOpeningProgress,saveAccountData,sendReview,recordVisit,getAdminDashboard,setAdminRole,searchUsers,friendRequest,friendRespond,friendRemove,friendList,friendRequests};
+ async function friendRequests(){const {data,error}=await requireClient().rpc('list_friend_requests');if(error)throw error;return data||[];} window.SupabaseApp={client,configured,signUp,signIn,signOut,getCurrentUser,profileFor,refreshProfile,verifyEmailToken,resendSignupConfirmation,getSignupEmailCooldownSeconds,startGame,updateGameStats,incrementSolvedPuzzles,saveProgress,saveOpeningProgress,saveAccountData,sendReview,recordVisit,getAdminDashboard,setAdminRole,searchUsers,friendRequest,friendRespond,friendRemove,friendList,friendRequests,friendshipStatus};
 })();

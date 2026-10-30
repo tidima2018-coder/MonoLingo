@@ -443,4 +443,7 @@ BEGIN
 END;
 $$;
 
+-- Refresh PostgREST so the new RPC functions become available to the website.
+NOTIFY pgrst, 'reload schema';
+
 COMMIT;
