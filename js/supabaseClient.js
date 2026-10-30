@@ -3,6 +3,8 @@
  const SUPABASE_URL='https://hvzqflrngprlgageztzz.supabase.co';
  const SUPABASE_PUBLISHABLE_KEY='sb_publishable_sHmULUjwuPNK49u2XuknJw_eE4WXZMW';
  const configured=!SUPABASE_URL.includes('YOUR_')&&!SUPABASE_PUBLISHABLE_KEY.includes('YOUR_');
+ const EMAIL_REQUEST_COOLDOWN_MS=60_000,EMAIL_REQUEST_COOLDOWN_KEY='monolingo-signup-email-last-request';
+ let lastEmailRequestAt=0;
  const client=configured&&window.supabase?.createClient?window.supabase.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY):null;
  function requireClient(){if(!client)throw new Error('Укажи Project URL и Publishable key в js/supabaseClient.js.');return client;}
  async function profileFor(userId){
@@ -25,10 +27,13 @@
   throw new Error('Не удалось создать профиль. Проверь SQL-права profiles в Supabase.');
  }
  async function refreshProfile(){const user=await getCurrentUser();if(!user)return null;const profile=await profileFor(user.id);document.dispatchEvent(new CustomEvent('supabase-profile-updated',{detail:{profile}}));return profile;}
- async function signUp(email,password,username){const clean=String(username||'').trim();if(clean.length<1||clean.length>32)throw new Error('Никнейм должен содержать от 1 до 32 символов.');const {data,error}=await requireClient().auth.signUp({email:String(email).trim(),password,options:{data:{username:clean}}});if(error)throw error;return data;}
+ function getSignupEmailCooldownSeconds(){let last=lastEmailRequestAt;try{last=Math.max(last,Number(localStorage.getItem(EMAIL_REQUEST_COOLDOWN_KEY))||0);}catch(error){}return Math.max(0,Math.ceil((EMAIL_REQUEST_COOLDOWN_MS-(Date.now()-last))/1000));}
+ function beginSignupEmailRequest(){const remaining=getSignupEmailCooldownSeconds();if(remaining){const error=new Error('Подожди '+remaining+' сек. перед повторной отправкой письма.');error.code='confirmation_resend_cooldown';error.retryAfterSeconds=remaining;throw error;}lastEmailRequestAt=Date.now();try{localStorage.setItem(EMAIL_REQUEST_COOLDOWN_KEY,String(lastEmailRequestAt));}catch(error){}}
+ function normalizeEmailSendError(error){const raw=String(error?.message||'').toLowerCase();if(error?.code==='over_email_send_rate_limit'||raw.includes('email rate limit exceeded')){const limited=new Error('Supabase ограничил отправку писем. Повторная попытка доступна после паузы; настрой custom SMTP в Supabase, чтобы отправлять письма пользователям.');limited.code='over_email_send_rate_limit';limited.status=429;return limited;}if(error?.status===429){const limited=new Error('Слишком много запросов к авторизации. Подожди перед следующей попыткой.');limited.code='auth_request_rate_limit';limited.status=429;return limited;}return error;}
+ async function signUp(email,password,username){const clean=String(username||'').trim();if(clean.length<1||clean.length>32)throw new Error('Никнейм должен содержать от 1 до 32 символов.');beginSignupEmailRequest();try{const {data,error}=await requireClient().auth.signUp({email:String(email).trim(),password,options:{data:{username:clean}}});if(error)throw error;return data;}catch(error){throw normalizeEmailSendError(error);}}
  async function signIn(email,password){const sb=requireClient(),{data,error}=await sb.auth.signInWithPassword({email:String(email).trim(),password});if(error)throw error;if(!data.user?.email_confirmed_at){await sb.auth.signOut();const unconfirmed=new Error('Email not confirmed');unconfirmed.code='email_not_confirmed';throw unconfirmed;}return data;}
  async function verifyEmailToken(tokenHash,type){if(typeof tokenHash!=='string'||!tokenHash.trim()||type!=='email')throw new Error('Недействительная ссылка подтверждения. Запроси новое письмо.');const {data,error}=await requireClient().auth.verifyOtp({token_hash:tokenHash,type:'email'});if(error)throw error;return data;}
- async function resendSignupConfirmation(email){const clean=String(email||'').trim();if(!clean)throw new Error('Укажи email для отправки письма.');const {data,error}=await requireClient().auth.resend({type:'signup',email:clean});if(error)throw error;return data;}
+ async function resendSignupConfirmation(email){const clean=String(email||'').trim();if(!clean)throw new Error('Укажи email для отправки письма.');beginSignupEmailRequest();try{const {data,error}=await requireClient().auth.resend({type:'signup',email:clean});if(error)throw error;return data;}catch(error){throw normalizeEmailSendError(error);}}
  async function signOut(){const {error}=await requireClient().auth.signOut();if(error)throw error;}
  async function getCurrentUser(){const {data,error}=await requireClient().auth.getSession();if(error)throw error;return data.session?.user||null;}
  async function startGame(){const {error}=await requireClient().rpc('record_game_started');if(error)throw error;return refreshProfile();}
@@ -41,5 +46,5 @@
  async function recordVisit(sessionId,pagePath){if(typeof sessionId!=='string'||!/^[0-9a-f-]{36}$/i.test(sessionId)||typeof pagePath!=='string')return;const {error}=await requireClient().rpc('record_site_visit',{p_session_id:sessionId,p_page_path:pagePath});if(error)throw error;}
  async function getAdminDashboard(){const {data,error}=await requireClient().rpc('admin_dashboard');if(error)throw error;return {users:data?.users||[],reviews:data?.reviews||[],analytics:data?.analytics||{}};}
  async function setAdminRole(userId,role){if(typeof userId!=='string'||!['admin','user'].includes(role))throw new Error('Некорректная роль.');const {data,error}=await requireClient().rpc('set_admin_role',{p_user_id:userId,p_role:role});if(error)throw error;return data;}
- window.SupabaseApp={client,configured,signUp,signIn,signOut,getCurrentUser,profileFor,refreshProfile,verifyEmailToken,resendSignupConfirmation,startGame,updateGameStats,incrementSolvedPuzzles,saveProgress,saveOpeningProgress,saveAccountData,sendReview,recordVisit,getAdminDashboard,setAdminRole};
+ window.SupabaseApp={client,configured,signUp,signIn,signOut,getCurrentUser,profileFor,refreshProfile,verifyEmailToken,resendSignupConfirmation,getSignupEmailCooldownSeconds,startGame,updateGameStats,incrementSolvedPuzzles,saveProgress,saveOpeningProgress,saveAccountData,sendReview,recordVisit,getAdminDashboard,setAdminRole};
 })();

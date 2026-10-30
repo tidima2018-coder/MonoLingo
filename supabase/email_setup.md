@@ -1,5 +1,9 @@
 # MonoLingo email confirmation and SMTP
 
+## Why registration gets HTTP 429
+
+Supabase's built-in email sender is intended for testing. Hosted projects currently have a project-wide limit of 2 Auth emails per hour, and the built-in sender only delivers to addresses on the Supabase organization's team. When the email quota is exceeded, Auth returns HTTP 429 with `over_email_send_rate_limit` / `email rate limit exceeded`. The site now shows a resend button and enforces a 60-second cooldown across tabs in the same browser; it does not retry requests automatically or bypass Supabase's limits.
+
 ## Confirm signup template
 
 1. Publish `confirm.html`, `js/confirm.js`, and the updated `js/supabaseClient.js` to the site. The production page is `https://monolingo.sitevo.kz/confirm.html`.
@@ -26,6 +30,9 @@ Changing the subject or HTML template does not change the sender shown in the in
    - Username: the SMTP login shown in Brevo
    - Password: the Brevo SMTP key
 7. Save and send a test signup email. Check that the inbox shows **MonoLingo** as the sender, the email arrives, and the link opens the deployed confirmation page.
+8. Open **Authentication → Rate Limits**. Keep the combined Auth email limit within the Brevo Free quota (currently 300 sends/day across transactional and campaign email). Start conservatively, leave headroom for password resets and other Auth messages, and do not turn off email confirmation to remove the limit.
+
+With custom SMTP, Supabase currently starts with a conservative Auth email limit of 30 per hour; it can be adjusted in Rate Limits. Brevo Free includes transactional mail and 300 daily sends, so account for all email types and avoid setting the Supabase limit above the provider's available quota. [Supabase documents the built-in and custom SMTP rate limits here](https://supabase.com/docs/guides/auth/rate-limits).
 
 Keep SMTP credentials only in the Supabase dashboard. Do not put them in this repository, browser JavaScript, or GitHub Pages. The static site only needs the public Supabase URL and publishable key.
 

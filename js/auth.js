@@ -11,6 +11,9 @@ document.documentElement.classList.add('auth-pending');
  const el=(tag,attrs={},text='')=>{const node=document.createElement(tag);for(const [key,value] of Object.entries(attrs))node.setAttribute(key,value);if(text)node.textContent=text;return node;};
  const message=error=>{
   const raw=String(error?.message||''),code=String(error?.code||'');
+  if(code==='confirmation_resend_cooldown')return error?.message||'Подожди перед повторной отправкой письма.';
+  if(code==='over_email_send_rate_limit'||raw.toLowerCase().includes('email rate limit exceeded'))return 'Сейчас исчерпан лимит отправки писем. Подожди и используй кнопку «Отправить письмо повторно»; для восстановления обычной отправки подключи SMTP в Supabase. Подтверждение почты отключать не нужно.';
+  if(code==='auth_request_rate_limit')return 'Слишком много запросов. Подожди перед следующей попыткой.';
   if(code==='email_not_confirmed'||raw.toLowerCase().includes('email not confirmed'))return 'Сначала подтверди email по ссылке из письма. Если ссылка истекла, запроси новое письмо.';
   if(code==='over_email_send_rate_limit'||raw.toLowerCase().includes('email rate limit exceeded'))return 'Supabase временно ограничил отправку писем подтверждения. Встроенная почта проекта имеет низкий лимит. Не нажимай регистрацию повторно: дождись сброса лимита или подключи собственный SMTP в Supabase → Authentication → SMTP Settings. Если первая попытка уже создала аккаунт, переключись на «Войти».';
   if(raw==='Failed to fetch')return 'Не удалось подключиться к Supabase. Проверь Project URL, Publishable key и интернет.';
@@ -30,11 +33,15 @@ document.documentElement.classList.add('auth-pending');
   const error=el('p',{class:'auth-error',role:'alert'});error.textContent=errorText;
   const form=el('form',{id:'auth-form'}),usernameLabel=el('label',{for:'auth-username'},'Никнейм'),username=el('input',{id:'auth-username',name:'username',autocomplete:'nickname',maxlength:'32',hidden:'','aria-label':'Никнейм'}),emailLabel=el('label',{for:'auth-email'},'Email'),email=el('input',{id:'auth-email',name:'email',type:'email',autocomplete:'email',required:''}),passwordLabel=el('label',{for:'auth-password'},'Пароль'),password=el('input',{id:'auth-password',name:'password',type:'password',autocomplete:'current-password',minlength:'8',required:''}),submit=el('button',{class:'primary',type:'submit'},'Войти'),toggle=el('button',{class:'auth-mode-toggle',type:'button'},'Создать аккаунт');
   username.required=false;
+ const resendButton=el('button',{class:'auth-mode-toggle',type:'button'},'Отправить письмо повторно');resendButton.hidden=true;
+ let resendCooldownTimer=0;
+ function syncResendCooldown(){clearInterval(resendCooldownTimer);const update=()=>{const seconds=api.getSignupEmailCooldownSeconds?.()||0;resendButton.disabled=seconds>0;resendButton.textContent=seconds?'Отправить письмо повторно через '+seconds+' с':'Отправить письмо повторно';if(!seconds)clearInterval(resendCooldownTimer);};update();if(resendButton.disabled)resendCooldownTimer=setInterval(update,1000);}
   usernameLabel.hidden=true;
-  form.append(usernameLabel,username,emailLabel,email,passwordLabel,password,submit,toggle);card.append(error,form);gate.append(card);document.body.append(gate);
+  form.append(usernameLabel,username,emailLabel,email,passwordLabel,password,submit,toggle,resendButton);card.append(error,form);gate.append(card);document.body.append(gate);
   let registering=false;
   toggle.onclick=()=>{registering=!registering;username.hidden=!registering;username.required=registering;usernameLabel.hidden=!registering;password.autocomplete=registering?'new-password':'current-password';submit.textContent=registering?'Зарегистрироваться':'Войти';toggle.textContent=registering?'Уже есть аккаунт? Войти':'Создать аккаунт';error.textContent='';};
-  form.onsubmit=async event=>{event.preventDefault();authCheckActive=false;submit.disabled=true;error.textContent='';try{const result=registering?await api.signUp(email.value,password.value,username.value):await api.signIn(email.value,password.value);if(registering&&!result.session){toggle.click();error.textContent='Аккаунт создан. Подтверди email по ссылке из письма, затем войди.';return;}location.reload();}catch(exception){error.textContent=message(exception);}finally{submit.disabled=false;}};
+  resendButton.onclick=async()=>{resendButton.disabled=true;try{await api.resendSignupConfirmation(email.value);error.textContent='Если аккаунт с таким email ожидает подтверждения, письмо отправлено.';}catch(exception){error.textContent=message(exception);}finally{syncResendCooldown();}};
+  form.onsubmit=async event=>{event.preventDefault();authCheckActive=false;submit.disabled=true;error.textContent='';try{const result=registering?await api.signUp(email.value,password.value,username.value):await api.signIn(email.value,password.value);if(registering&&!result.session){toggle.click();error.textContent='Аккаунт создан. Подтверди email по ссылке из письма, затем войди.';resendButton.hidden=false;syncResendCooldown();return;}location.reload();}catch(exception){error.textContent=message(exception);if(['over_email_send_rate_limit','email_not_confirmed'].includes(exception?.code)){resendButton.hidden=false;syncResendCooldown();}}finally{submit.disabled=false;}};
  }
  function openReviewDialog(){
   let dialog=document.getElementById('review-dialog');if(dialog){dialog.showModal();return;}
