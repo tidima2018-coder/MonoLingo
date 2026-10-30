@@ -465,6 +465,8 @@ html:not([data-theme="aristocrat"]) #activities .activity-group>.daily-card:focu
 
 .friends-search-hint{margin:8px 0;color:var(--ink);font-size:14px}.friend-search-result{background:#fffefa;border-radius:10px;padding:10px 12px;margin-top:7px}.friend-result-name{display:block;flex:1;color:var(--ink);font-weight:750;overflow-wrap:anywhere}
 
+#duel-invite-dialog, .online-invite-dialog{max-width:500px}#duel-invite-dialog form{display:grid;gap:12px}#duel-invite-dialog label{display:grid;gap:5px;font-weight:650}#duel-invite-dialog select,#duel-invite-dialog input{width:100%;padding:10px;border-radius:8px;font:inherit}.online-history-row{flex-wrap:wrap}.online-history-row .small{margin-left:auto}.online-invite-dialog .friends-panel{display:grid;gap:12px}.online-invite-dialog .friends-panel h2{margin:0}
+
 .friend-search-result{flex-wrap:wrap}.friend-add-button{min-width:190px}.friend-add-button:disabled{opacity:.82;color:var(--ink);background:#edf1e6;cursor:default}.friends-setup-hint{padding:8px 10px;border-left:3px solid #b98b34;background:#fff7e5;border-radius:4px}@media(max-width:520px){.friend-add-button{width:100%}}
 
 /* MonoLingo — Friends UI */

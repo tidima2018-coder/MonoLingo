@@ -238,3 +238,7 @@ html[data-theme="aristocrat"] .friends-panel .friend-name{font-weight:700}
 html[data-theme="aristocrat"] .friend-presence.is-offline{color:#c0ab8c}
 html[data-theme="aristocrat"] .friends-section .friend-row:hover{background:#ffffff08}
 @media(max-width:560px){html[data-theme="aristocrat"] .friend-request-state{white-space:normal}.friends-panel .friend-row{gap:8px}}
+
+html[data-theme="aristocrat"] #duel-invite-dialog select{background:#332419;color:#fff4df;border:1px solid #c59a56;border-radius:8px;padding:10px;font:inherit}
+html[data-theme="aristocrat"] #duel-invite-dialog select:focus{outline:2px solid #e8b95f;outline-offset:2px}
+html:not([data-theme="aristocrat"]) #duel-invite-dialog select{background:#fff;color:#233b32;border:1px solid #b9c7be}
