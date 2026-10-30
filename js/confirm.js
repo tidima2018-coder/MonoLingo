@@ -11,7 +11,7 @@
  button.addEventListener('click',async()=>{
   button.disabled=true;status.classList.remove('confirm-error');status.textContent='Подтверждаю email…';
   try{
-   await window.SupabaseApp.verifyEmailToken(tokenHash,type);
+   if(typeof window.SupabaseApp?.verifyEmailToken!=='function')throw new Error('Клиент Supabase не загрузился. Обнови страницу и повтори попытку.');await window.SupabaseApp.verifyEmailToken(tokenHash,type);
    history.replaceState({},document.title,location.pathname);
    button.hidden=true;retry.hidden=true;resendForm.hidden=true;login.hidden=false;
    message.textContent='Твой email подтверждён. Аккаунт активирован.';
@@ -24,7 +24,7 @@
  });
  resendForm.addEventListener('submit',async event=>{
   event.preventDefault();const submit=resendForm.querySelector('button');submit.disabled=true;status.classList.remove('confirm-error');status.textContent='Отправляю письмо…';
-  try{await window.SupabaseApp.resendSignupConfirmation(document.getElementById('resend-email').value);status.textContent='Если для этого адреса ожидает подтверждения аккаунт, новое письмо отправлено.';}
+  try{if(typeof window.SupabaseApp?.resendSignupConfirmation!=='function')throw new Error('Клиент Supabase не загрузился. Обнови страницу и повтори попытку.');await window.SupabaseApp.resendSignupConfirmation(document.getElementById('resend-email').value);status.textContent='Если для этого адреса ожидает подтверждения аккаунт, новое письмо отправлено.';}
   catch(error){status.classList.add('confirm-error');status.textContent=error?.message||'Не удалось отправить письмо. Попробуй позже.';}
   finally{syncResendCooldown(submit);}
  });

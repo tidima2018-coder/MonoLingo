@@ -40,8 +40,8 @@ document.documentElement.classList.add('auth-pending');
   form.append(usernameLabel,username,emailLabel,email,passwordLabel,password,submit,toggle,resendButton);card.append(error,form);gate.append(card);document.body.append(gate);
   let registering=false;
   toggle.onclick=()=>{registering=!registering;username.hidden=!registering;username.required=registering;usernameLabel.hidden=!registering;password.autocomplete=registering?'new-password':'current-password';submit.textContent=registering?'Зарегистрироваться':'Войти';toggle.textContent=registering?'Уже есть аккаунт? Войти':'Создать аккаунт';error.textContent='';};
-  resendButton.onclick=async()=>{resendButton.disabled=true;try{await api.resendSignupConfirmation(email.value);error.textContent='Если аккаунт с таким email ожидает подтверждения, письмо отправлено.';}catch(exception){error.textContent=message(exception);}finally{syncResendCooldown();}};
-  form.onsubmit=async event=>{event.preventDefault();authCheckActive=false;submit.disabled=true;error.textContent='';try{const result=registering?await api.signUp(email.value,password.value,username.value):await api.signIn(email.value,password.value);if(registering&&!result.session){toggle.click();error.textContent='Аккаунт создан. Подтверди email по ссылке из письма, затем войди.';resendButton.hidden=false;syncResendCooldown();return;}location.reload();}catch(exception){error.textContent=message(exception);if(['over_email_send_rate_limit','email_not_confirmed'].includes(exception?.code)){resendButton.hidden=false;syncResendCooldown();}}finally{submit.disabled=false;}};
+  resendButton.onclick=async()=>{resendButton.disabled=true;try{if(typeof api?.resendSignupConfirmation!=='function')throw new Error('Модуль Supabase не загрузился. Обнови страницу и повтори попытку.');await api.resendSignupConfirmation(email.value);error.textContent='Если аккаунт с таким email ожидает подтверждения, письмо отправлено.';}catch(exception){error.textContent=message(exception);}finally{syncResendCooldown();}};
+  form.onsubmit=async event=>{event.preventDefault();authCheckActive=false;submit.disabled=true;error.textContent='';try{const authMethod=registering?api?.signUp:api?.signIn;if(typeof authMethod!=='function')throw new Error('Модуль авторизации Supabase не загрузился. Обнови страницу; если ошибка повторится, проверь подключение js/supabaseClient.js.');const result=registering?await authMethod(email.value,password.value,username.value):await authMethod(email.value,password.value);if(registering&&!result.session){toggle.click();error.textContent='Аккаунт создан. Подтверди email по ссылке из письма, затем войди.';resendButton.hidden=false;syncResendCooldown();return;}location.reload();}catch(exception){error.textContent=message(exception);if(['over_email_send_rate_limit','email_not_confirmed'].includes(exception?.code)){resendButton.hidden=false;syncResendCooldown();}}finally{submit.disabled=false;}};
  }
  function openReviewDialog(){
   let dialog=document.getElementById('review-dialog');if(dialog){dialog.showModal();return;}
@@ -50,58 +50,105 @@ document.documentElement.classList.add('auth-pending');
   const status=el('p',{role:'status',class:'review-status'}),submit=el('button',{type:'submit',class:'primary'},'Отправить отзыв'),cancel=el('button',{type:'button'},'Отмена'),actions=el('div',{class:'actions'});cancel.onclick=()=>dialog.close();actions.append(submit,cancel);form.append(label,textarea,status,actions);dialog.append(form);document.body.append(dialog);
   form.onsubmit=async event=>{event.preventDefault();submit.disabled=true;status.textContent='';try{await api.sendReview(textarea.value);status.textContent='Спасибо! Отзыв сохранён.';textarea.value='';setTimeout(()=>dialog.close(),900);}catch(error){status.textContent=message(error);}finally{submit.disabled=false;}};dialog.showModal();
  }
- let friendsRenderer=null;async function openFriendsDialog(){
-  let dialog=document.getElementById('friends-dialog');if(dialog){dialog.showModal();await friendsRenderer?.();return;}
-  dialog=el('dialog',{id:'friends-dialog',class:'friends-dialog'});const wrap=el('section',{class:'friends-panel'});wrap.append(el('span',{class:'eyebrow'},'Социальная игра'),el('h2',{},'Друзья'));
-  const status=el('p',{class:'friends-status',role:'status'}),label=el('label',{for:'friends-search'},'Найти по никнейму'),input=el('input',{id:'friends-search',type:'search',maxlength:'32',autocomplete:'off',placeholder:'Введите минимум 2 символа'}),results=el('div',{class:'friends-results'}),requests=el('section',{class:'friends-section'}),list=el('section',{class:'friends-section'}),close=el('button',{type:'button'},'Закрыть');close.onclick=()=>dialog.close();wrap.append(status,label,input,results,requests,list,close);dialog.append(wrap);document.body.append(dialog);
-  let searchTimer=0,searchSequence=0;
+ let friendsRenderer=null,friendActivityTimer=0,lastSeenTimer=0;
+ async function openFriendsDialog(){
+  let dialog=document.getElementById('friends-dialog');
+  if(dialog){dialog.showModal();await friendsRenderer?.();startFriendActivityRefresh();return;}
+  dialog=el('dialog',{id:'friends-dialog',class:'friends-dialog'});
+  const wrap=el('section',{class:'friends-panel'});
+  wrap.append(el('span',{class:'eyebrow'},'Социальная игра'),el('h2',{},'Друзья'));
+  const status=el('p',{class:'friends-status',role:'status'});
+  const searchSection=el('section',{class:'friends-section'});
+  searchSection.append(el('h3',{},'Поиск игроков'));
+  const label=el('label',{for:'friends-search'},'Найти по никнейму');
+  const input=el('input',{id:'friends-search',type:'search',maxlength:'32',autocomplete:'off',placeholder:'Введите никнейм'});
+  const results=el('div',{class:'friends-results'});searchSection.append(label,input,results);
+  const incoming=el('section',{class:'friends-section'}),outgoing=el('section',{class:'friends-section'}),list=el('section',{class:'friends-section'});
+  const close=el('button',{type:'button',class:'friends-close'},'Закрыть');close.onclick=()=>dialog.close();
+  wrap.append(status,searchSection,incoming,outgoing,list,close);dialog.append(wrap);document.body.append(dialog);
   const friendError=e=>{
-   if(e?.code==='PGRST202')return 'Поисковая функция отсутствует в Supabase. Выполните supabase/friends_search_rpc.sql; если таблицы friend_directory ещё нет — сначала supabase/friends.sql. Затем обновите страницу.';
-   if(e?.code==='42501')return 'Supabase запретил действие политикой доступа. Проверьте, что friends.sql применён для таблицы friendships.';
+   if(e?.code==='PGRST202')return 'Функция друзей отсутствует в Supabase. Выполните supabase/friends.sql и supabase/friends_activity.sql в SQL Editor.';
+   if(e?.code==='42501')return 'Supabase отклонил запрос по правилам доступа. Проверьте применение миграций друзей.';
    const raw=String(e?.message||'');
    if(raw.includes('Friend request already exists'))return 'Заявка уже отправлена или вы уже друзья.';
    if(raw.includes('Friend request unavailable'))return 'Эта заявка уже обработана. Обновите список.';
-   if(raw==='Failed to fetch')return 'Не удалось подключиться к Supabase. Проверьте интернет и повторите попытку.';
+   if(raw==='Failed to fetch')return 'Нет соединения с Supabase. Проверьте интернет; после подключения данные обновятся.';
    return raw||'Не удалось выполнить действие. Повторите попытку.';
   };
+  const minuteWord=n=>n===1?'минуту':n%10>=2&&n%10<=4&&(n%100<12||n%100>14)?'минуты':'минут';
+  const hourWord=n=>n===1?'час':n%10>=2&&n%10<=4&&(n%100<12||n%100>14)?'часа':'часов';
+  const dayWord=n=>n%10>=2&&n%10<=4&&(n%100<12||n%100>14)?'дня':'дней';
+  function lastSeenLabel(value){if(!value)return 'Активность неизвестна';const elapsed=Math.max(0,Date.now()-new Date(value).getTime());if(!Number.isFinite(elapsed))return 'Активность неизвестна';if(elapsed<60_000)return 'Был только что';const minutes=Math.floor(elapsed/60_000);if(minutes<60)return 'Был '+minutes+' '+minuteWord(minutes)+' назад';const hours=Math.floor(minutes/60);if(hours<24)return 'Был '+hours+' '+hourWord(hours)+' назад';const days=Math.floor(hours/24);return days===1?'Был вчера':'Был '+days+' '+dayWord(days)+' назад';}
+  function setSearchStatusHint(){const hint=el('p',{class:'friends-search-hint friends-setup-hint'},'Чтобы видеть состояние заявки, примените supabase/friends_activity.sql в Supabase.');results.append(hint);}
+  let searchTimer=0,searchSequence=0;
   async function showSearchResults(query,sequence){
-   results.replaceChildren();
-   if(query.length<2){if(query)results.append(el('p',{class:'friends-search-hint'},'Введите ещё хотя бы один символ для поиска «'+query+'».'));return;}
-   results.append(el('p',{class:'friends-search-hint'},'Ищем ник «'+query+'»…'));
+   results.replaceChildren();if(query.length<2){if(query)results.append(el('p',{class:'friends-search-hint'},'Введите ещё хотя бы один символ для поиска.'));return;}
+   results.append(el('p',{class:'friends-search-hint'},'Ищем «'+query+'»…'));
    try{
     const people=await api.searchUsers(query);if(sequence!==searchSequence)return;
-    if(!people.length){results.replaceChildren(el('p',{class:'friends-search-hint'},'Пользователь «'+query+'» не найден.'));return;}
+    if(!people.length){results.replaceChildren(el('p',{class:'friends-search-hint'},'Игрок «'+query+'» не найден.'));return;}
     const states=await Promise.all(people.map(async person=>{try{return await api.friendshipStatus(person.user_id);}catch(error){return null;}}));
     if(sequence!==searchSequence)return;
-    results.replaceChildren(el('p',{class:'friends-search-hint'},'Результаты поиска по нику «'+query+'»:'));
+    results.replaceChildren(el('p',{class:'friends-search-hint'},'Найденные игроки:'));
     people.forEach((person,index)=>{
      const relation=states[index],row=el('div',{class:'friend-row friend-search-result'});
      row.append(el('strong',{class:'friend-result-name'},person.username||'Игрок'));
-     let label='+ Добавить в друзья',disabled=false,acceptIncoming=false;
+     let label='+ Добавить в друзья',mode='add',disabled=false;
      if(relation?.status==='accepted'){label='В друзьях';disabled=true;}
-     else if(relation?.status==='pending'&&relation.sent_by_me){label='Ожидает подтверждения';disabled=true;}
-     else if(relation?.status==='pending'){label='Принять заявку';acceptIncoming=true;}
+     else if(relation?.status==='pending'&&relation.sent_by_me){label='Отменить заявку';mode='cancel';}
+     else if(relation?.status==='pending'){label='Принять заявку';mode='accept';}
      const action=el('button',{type:'button',class:'compact friend-add-button'},label);action.disabled=disabled;
-     if(!disabled)action.onclick=async()=>{
-      action.disabled=true;
-      try{
-       if(acceptIncoming)await api.friendRespond(relation.friendship_id,true);
-       else await api.friendRequest(person.user_id);
-       status.textContent=acceptIncoming?'Заявка принята. Теперь вы друзья.':'Заявка отправлена. Ожидает подтверждения.';
-       const current=++searchSequence;await friendsRenderer();await showSearchResults(input.value.trim(),current);
-      }catch(error){action.disabled=false;status.textContent=friendError(error);if(String(error?.message||'').includes('already exists')){const current=++searchSequence;await showSearchResults(input.value.trim(),current);}}
+     if(!disabled)action.onclick=async()=>{action.disabled=true;try{
+      if(mode==='cancel')await api.cancelFriendRequest(relation.friendship_id);
+      else if(mode==='accept')await api.friendRespond(relation.friendship_id,true);
+      else await api.friendRequest(person.user_id);
+      status.textContent=mode==='add'?'Заявка отправлена.':mode==='cancel'?'Исходящая заявка отменена.':'Заявка принята. Теперь вы друзья.';
+      const current=++searchSequence;await friendsRenderer();await showSearchResults(input.value.trim(),current);
+     }catch(error){action.disabled=false;status.textContent=friendError(error);if(String(error?.message||'').includes('already exists')){const current=++searchSequence;await showSearchResults(input.value.trim(),current);}}
      };
      row.append(action);results.append(row);
     });
-    if(states.some((value,index)=>!value&&people[index].user_id)){const hint=el('p',{class:'friends-search-hint'},'Чтобы показывать текущий статус заявки, примените supabase/friends_status.sql в Supabase.');hint.classList.add('friends-setup-hint');results.append(hint);}
+    if(states.some((value,index)=>!value&&people[index].user_id))setSearchStatusHint();
    }catch(error){if(sequence!==searchSequence)return;results.replaceChildren(el('p',{class:'friends-search-hint'},friendError(error)));}
   }
-  input.oninput=()=>{clearTimeout(searchTimer);const query=input.value.trim(),sequence=++searchSequence;results.replaceChildren();if(query.length<2){if(query)results.append(el('p',{class:'friends-search-hint'},'Введите ещё хотя бы один символ для поиска «'+query+'».'));return;}results.append(el('p',{class:'friends-search-hint'},'Ищем ник «'+query+'»…'));searchTimer=setTimeout(()=>showSearchResults(query,sequence),250);};
-  friendsRenderer=async function(){try{const [incoming,friends]=await Promise.all([api.friendRequests(),api.friendList()]);requests.replaceChildren(el('h3',{},'Входящие заявки'+(incoming.length?' ('+incoming.length+')':'')));if(!incoming.length)requests.append(el('p',{class:'small'},'Новых заявок нет.'));for(const req of incoming){const row=el('div',{class:'friend-row'});row.append(el('span',{},req.username));for(const [accept,title] of [[true,'Принять'],[false,'Отклонить']]){const button=el('button',{type:'button',class:accept?'primary compact':'compact'},title);button.onclick=async()=>{button.disabled=true;try{await api.friendRespond(req.request_id,accept);await friendsRenderer();}catch(e){status.textContent=friendError(e);button.disabled=false;}};row.append(button);}requests.append(row);}list.replaceChildren(el('h3',{},'Мои друзья'));if(!friends.length)list.append(el('p',{class:'small'},'Пока никого нет.'));for(const friend of friends){const row=el('div',{class:'friend-row'});row.append(el('span',{class:'friend-name'},friend.username));const online=el('span',{class:'friend-presence','data-user-id':friend.user_id},'Проверяем…');row.append(online);const remove=el('button',{type:'button',class:'compact'},'Удалить');remove.onclick=async()=>{remove.disabled=true;try{await api.friendRemove(friend.user_id);await friendsRenderer();}catch(e){status.textContent=friendError(e);remove.disabled=false;}};row.append(remove);list.append(row);}refreshPresence(friends);}catch(e){status.textContent=message(e);}};
-  dialog.addEventListener('close',()=>{presenceChannels.forEach(ch=>api.client.removeChannel(ch));presenceChannels=[];});dialog.showModal();await friendsRenderer();
+  input.oninput=()=>{clearTimeout(searchTimer);const query=input.value.trim(),sequence=++searchSequence;results.replaceChildren();if(query.length<2){if(query)results.append(el('p',{class:'friends-search-hint'},'Введите ещё хотя бы один символ для поиска.'));return;}results.append(el('p',{class:'friends-search-hint'},'Ищем «'+query+'»…'));searchTimer=setTimeout(()=>showSearchResults(query,sequence),250);};
+  friendsRenderer=async function(){
+   try{
+    const [incomingRows,outgoingRows,friendRows]=await Promise.all([api.friendRequests(),api.outgoingFriendRequests(),api.friendActivity()]);
+    incoming.replaceChildren(el('h3',{},'Входящие заявки'+(incomingRows.length?' ('+incomingRows.length+')':'')));
+    if(!incomingRows.length)incoming.append(el('p',{class:'small'},'Новых заявок нет.'));
+    for(const request of incomingRows){const row=el('div',{class:'friend-row'});row.append(el('strong',{class:'friend-result-name'},request.username));
+     for(const [accept,title] of [[true,'Принять'],[false,'Отклонить']]){const button=el('button',{type:'button',class:accept?'primary compact':'compact'},title);button.onclick=async()=>{button.disabled=true;try{await api.friendRespond(request.request_id,accept);status.textContent=accept?'Заявка принята.':'Заявка отклонена.';await friendsRenderer();if(input.value.trim().length>=2){const seq=++searchSequence;await showSearchResults(input.value.trim(),seq);}}catch(error){status.textContent=friendError(error);button.disabled=false;}};row.append(button);}incoming.append(row);
+    }
+    outgoing.replaceChildren(el('h3',{},'Исходящие заявки'+(outgoingRows.length?' ('+outgoingRows.length+')':'')));
+    if(!outgoingRows.length)outgoing.append(el('p',{class:'small'},'Нет ожидающих заявок.'));
+    for(const request of outgoingRows){const row=el('div',{class:'friend-row'});row.append(el('strong',{class:'friend-result-name'},request.username),el('span',{class:'friend-request-state'},'Ожидает подтверждения'));const cancel=el('button',{type:'button',class:'compact'},'Отменить');cancel.onclick=async()=>{cancel.disabled=true;try{await api.cancelFriendRequest(request.request_id);status.textContent='Исходящая заявка отменена.';await friendsRenderer();if(input.value.trim().length>=2){const seq=++searchSequence;await showSearchResults(input.value.trim(),seq);}}catch(error){status.textContent=friendError(error);cancel.disabled=false;}};row.append(cancel);outgoing.append(row);}
+    list.replaceChildren(el('h3',{},'Мои друзья'));
+    if(!friendRows.length)list.append(el('p',{class:'small'},'Пока никого нет.'));
+    for(const friend of friendRows){const row=el('div',{class:'friend-row'});row.append(el('strong',{class:'friend-result-name friend-name'},friend.username));const presence=el('span',{class:'friend-presence','data-user-id':friend.user_id},lastSeenLabel(friend.last_seen_at));row.append(presence);const remove=el('button',{type:'button',class:'compact'},'Удалить');remove.onclick=async()=>{remove.disabled=true;try{await api.friendRemove(friend.user_id);status.textContent='Друг удалён из списка.';await friendsRenderer();if(input.value.trim().length>=2){const seq=++searchSequence;await showSearchResults(input.value.trim(),seq);}}catch(error){status.textContent=friendError(error);remove.disabled=false;}};row.append(remove);list.append(row);}
+    refreshPresence(friendRows);
+   }catch(error){status.textContent=friendError(error);}
+  };
+  dialog.addEventListener('close',()=>{clearInterval(friendActivityTimer);friendActivityTimer=0;presenceChannels.forEach(channel=>api.client.removeChannel(channel));presenceChannels=[];});
+  dialog.showModal();await friendsRenderer();startFriendActivityRefresh();
+  function startFriendActivityRefresh(){clearInterval(friendActivityTimer);friendActivityTimer=setInterval(()=>{if(dialog.open)friendsRenderer();},60_000);}
  }
- let presenceChannels=[];function refreshPresence(friends){presenceChannels.forEach(ch=>api.client.removeChannel(ch));presenceChannels=[];for(const friend of friends){const node=document.querySelector('.friend-presence[data-user-id="'+friend.user_id+'"]');if(!node)continue;const channel=api.client.channel('user:'+friend.user_id,{config:{private:true,presence:{key:friend.user_id}}});channel.on('presence',{event:'sync'},()=>{node.textContent=Object.keys(channel.presenceState()).length?'В сети':'Не в сети';node.classList.toggle('is-online',Object.keys(channel.presenceState()).length>0);});channel.subscribe();presenceChannels.push(channel);}}
- function startOwnPresence(){const id=profile?.id;if(!id||window.__monoPresenceStarted)return;window.__monoPresenceStarted=true;const ch=api.client.channel('user:'+id,{config:{private:true,presence:{key:id}}});ch.subscribe(async state=>{if(state==='SUBSCRIBED')await ch.track({online:true,at:new Date().toISOString()});});} let friendNotifyChannel=null;async function refreshFriendBadge(){try{const pending=await api.friendRequests(),button=document.querySelector('#account-controls [data-friends-button]');if(button)button.textContent=pending.length?'Друзья · '+pending.length:'Друзья';}catch(error){}}function startFriendNotifications(){if(friendNotifyChannel)return;friendNotifyChannel=api.client.channel('friend-notifications:'+profile.id);friendNotifyChannel.on('postgres_changes',{event:'*',schema:'public',table:'friendships',filter:'recipient=eq.'+profile.id},async payload=>{await refreshFriendBadge();if(payload.eventType==='INSERT'&&payload.new?.status==='pending'){let toast=document.getElementById('friend-toast');if(!toast){toast=el('div',{id:'friend-toast',role:'status'});document.body.append(toast);}toast.textContent='Новая заявка в друзья';toast.classList.add('friend-toast-visible');setTimeout(()=>toast.classList.remove('friend-toast-visible'),4500);}}).subscribe();refreshFriendBadge();}function addAccountControls(){const header=document.querySelector('header');if(!header||document.getElementById('account-controls'))return;const controls=el('div',{id:'account-controls',class:'account-controls'});controls.append(el('span',{class:'account-name'},profile.username),el('span',{class:'account-xp'},'XP '+profile.xp));const friends=el('button',{type:'button','data-friends-button':''},'Друзья'),review=el('button',{type:'button'},'Оставить отзыв'),signOut=el('button',{type:'button'},'Выйти');friends.onclick=openFriendsDialog;review.onclick=openReviewDialog;controls.append(friends);signOut.onclick=async()=>{signOut.disabled=true;try{await api.signOut();location.reload();}catch(error){signOut.disabled=false;alert(message(error));}};controls.append(review,signOut);if(['admin','super_admin'].includes(profile.role))controls.append(el('a',{class:'button compact',href:'admin.html'},'Админ-панель'));header.append(controls);}
+ let presenceChannels=[];
+ function refreshPresence(friends){
+  presenceChannels.forEach(channel=>api.client.removeChannel(channel));presenceChannels=[];
+  for(const friend of friends){const node=document.querySelector('.friend-presence[data-user-id="'+friend.user_id+'"]');if(!node)continue;
+   const channel=api.client.channel('user:'+friend.user_id,{config:{private:true,presence:{key:friend.user_id}}});
+   const sync=()=>{const online=Object.keys(channel.presenceState()).length>0;node.textContent=online?'В сети':lastSeenLabel(friend.last_seen_at);node.classList.toggle('is-online',online);node.classList.toggle('is-offline',!online);};
+   channel.on('presence',{event:'sync'},sync);channel.on('presence',{event:'join'},sync);channel.on('presence',{event:'leave'},sync);
+   channel.subscribe(state=>{if(state==='SUBSCRIBED')sync();else if(state==='CHANNEL_ERROR'||state==='TIMED_OUT'){node.textContent=lastSeenLabel(friend.last_seen_at);node.classList.remove('is-online');node.classList.add('is-offline');}});presenceChannels.push(channel);
+  }
+ } function startOwnPresence(){const id=profile?.id;if(!id||window.__monoPresenceStarted)return;window.__monoPresenceStarted=true;const channel=api.client.channel('user:'+id,{config:{private:true,presence:{key:id}}});channel.subscribe(async state=>{if(state==='SUBSCRIBED')await channel.track({online:true,at:new Date().toISOString()});});}
+ function startLastSeenHeartbeat(){if(lastSeenTimer)return;const touch=()=>api.touchLastSeen().catch(error=>console.warn('Не удалось обновить время активности:',error));touch();lastSeenTimer=setInterval(touch,60_000);if(!window.__monoLastSeenPagehide){window.__monoLastSeenPagehide=true;window.addEventListener('pagehide',()=>{api.touchLastSeen().catch(()=>{});});}}
+ let friendNotifyChannel=null,friendOutgoingNotifyChannel=null;
+ async function refreshFriendBadge(){try{const pending=await api.friendRequests(),button=document.querySelector('#account-controls [data-friends-button]');if(button)button.textContent=pending.length?'Друзья · '+pending.length:'Друзья';}catch(error){}}
+ function showFriendToast(text){let toast=document.getElementById('friend-toast');if(!toast){toast=el('div',{id:'friend-toast',role:'status'});document.body.append(toast);}toast.textContent=text;toast.classList.add('friend-toast-visible');setTimeout(()=>toast.classList.remove('friend-toast-visible'),4500);}
+ function refreshOpenFriends(){const dialog=document.getElementById('friends-dialog');if(dialog?.open&&friendsRenderer)friendsRenderer();}
+ function startFriendNotifications(){if(friendNotifyChannel)return;const handleIncoming=async payload=>{await refreshFriendBadge();refreshOpenFriends();if(payload.eventType==='INSERT'&&payload.new?.status==='pending')showFriendToast('Новая заявка в друзья');};const handleOutgoing=async payload=>{refreshOpenFriends();if(payload.eventType==='UPDATE'&&payload.new?.status==='accepted')showFriendToast('Заявка принята — вы теперь друзья');else if(payload.eventType==='UPDATE'&&payload.new?.status==='rejected')showFriendToast('Заявка отклонена');};friendNotifyChannel=api.client.channel('friend-notifications-in:'+profile.id);friendNotifyChannel.on('postgres_changes',{event:'*',schema:'public',table:'friendships',filter:'recipient=eq.'+profile.id},handleIncoming).subscribe();friendOutgoingNotifyChannel=api.client.channel('friend-notifications-out:'+profile.id);friendOutgoingNotifyChannel.on('postgres_changes',{event:'*',schema:'public',table:'friendships',filter:'requester=eq.'+profile.id},handleOutgoing).subscribe();refreshFriendBadge();}function addAccountControls(){const header=document.querySelector('header');if(!header||document.getElementById('account-controls'))return;const controls=el('div',{id:'account-controls',class:'account-controls'});controls.append(el('span',{class:'account-name'},profile.username),el('span',{class:'account-xp'},'XP '+profile.xp));const friends=el('button',{type:'button','data-friends-button':''},'Друзья'),review=el('button',{type:'button'},'Оставить отзыв'),signOut=el('button',{type:'button'},'Выйти');friends.onclick=openFriendsDialog;review.onclick=openReviewDialog;controls.append(friends);signOut.onclick=async()=>{signOut.disabled=true;try{await api.signOut();location.reload();}catch(error){signOut.disabled=false;alert(message(error));}};controls.append(review,signOut);if(['admin','super_admin'].includes(profile.role))controls.append(el('a',{class:'button compact',href:'admin.html'},'Админ-панель'));header.append(controls);}
  document.addEventListener('supabase-profile-updated',event=>{profile=event.detail.profile;const name=document.querySelector('.account-name'),xp=document.querySelector('.account-xp');if(name)name.textContent=profile.username;if(xp)xp.textContent='XP '+profile.xp;});
  async function loadProfile(user){
   const selectedTheme=authThemeChoice();if(selectedTheme)try{localStorage.setItem('chess-theme',selectedTheme);}catch(error){}
@@ -111,11 +158,11 @@ document.documentElement.classList.add('auth-pending');
   profile=await api.profileFor(user.id);if(!profile||profile.id!==user.id)throw new Error('Профиль не найден. Проверь SQL-схему и триггер создания профиля.');
   const accountData=user.user_metadata?.chess_app_data;if(accountData&&typeof accountData==='object')applyAccountData(accountData);else scheduleAccountDataSync();
   const home=/\/(?:index\.html)?$/.test(location.pathname);if(window.App?.hydrateCloudProgress&&window.App.hydrateCloudProgress(profile)&&home){location.reload();return false;}
-  ready=true;if(selectedTheme||!accountData||typeof accountData!=='object')scheduleAccountDataSync();addAccountControls();startOwnPresence();startFriendNotifications();window.dispatchEvent(new CustomEvent('supabase-profile-loaded',{detail:{profile}}));const gate=document.getElementById('auth-gate');if(gate)gate.hidden=true;document.documentElement.classList.remove('auth-pending');if(location.pathname.endsWith('/admin.html'))window.dispatchEvent(new CustomEvent('supabase-admin-ready',{detail:{profile}}));scheduleProgressSync();return true;
+  ready=true;if(selectedTheme||!accountData||typeof accountData!=='object')scheduleAccountDataSync();addAccountControls();startOwnPresence();startLastSeenHeartbeat();startFriendNotifications();window.dispatchEvent(new CustomEvent('supabase-profile-loaded',{detail:{profile}}));const gate=document.getElementById('auth-gate');if(gate)gate.hidden=true;document.documentElement.classList.remove('auth-pending');if(location.pathname.endsWith('/admin.html'))window.dispatchEvent(new CustomEvent('supabase-admin-ready',{detail:{profile}}));scheduleProgressSync();return true;
  }
  function scheduleProgressSync(){if(!ready||!window.App?.getProgressSnapshot)return;clearTimeout(syncTimer);syncTimer=setTimeout(async()=>{try{await api.saveProgress(window.App.getProgressSnapshot());}catch(error){console.error('Не удалось сохранить прогресс в Supabase:',error);document.dispatchEvent(new CustomEvent('cloud-sync-error',{detail:{message:message(error)}}));}},250);}
- async function start(){if(!api?.configured||!api.client){showGate('Подключи Supabase: заполни Project URL и Publishable key в js/supabaseClient.js.');return;}try{const user=await api.getCurrentUser();if(!authCheckActive)return;if(!user){showGate();return;}document.documentElement.classList.remove('auth-pending');await loadProfile(user);}catch(error){if(authCheckActive)showGate(message(error));}}
+ async function start(){if(!api){showGate('Не загрузился js/supabaseClient.js. Обнови страницу; если ошибка повторится, проверь порядок скриптов в HTML.');return;}if(!api.configured||!api.client){showGate('Не удалось запустить Supabase. Проверь Project URL, Publishable key и загрузку CDN-библиотеки.');return;}try{const user=await api.getCurrentUser();if(!authCheckActive)return;if(!user){showGate();return;}document.documentElement.classList.remove('auth-pending');await loadProfile(user);}catch(error){if(authCheckActive)showGate(message(error));}}
  document.addEventListener('app-progress-change',scheduleProgressSync);for(const eventName of ['piece-appearance-change','board-appearance-change','board-view-change','stockfish-skill-change','app-account-data-change'])document.addEventListener(eventName,scheduleAccountDataSync);document.addEventListener('DOMContentLoaded',start,{once:true});
- api?.client?.auth.onAuthStateChange(event=>{if(event==='SIGNED_OUT'){ready=false;showGate();}});
+ api?.client?.auth.onAuthStateChange(event=>{if(event==='SIGNED_OUT'){ready=false;clearInterval(lastSeenTimer);lastSeenTimer=0;clearInterval(friendActivityTimer);friendActivityTimer=0;showGate();}});
  window.SupabaseAuth={get profile(){return profile;},get ready(){return ready;}};
 })();

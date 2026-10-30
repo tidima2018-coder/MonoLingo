@@ -1,13 +1,13 @@
 'use strict';
 (() => {
- const SUPABASE_URL='https://hvzqflrngprlgageztzz.supabase.co/rest/v1/  ';
+ const SUPABASE_URL='https://hvzqflrngprlgageztzz.supabase.co';
  const SUPABASE_PUBLISHABLE_KEY='sb_publishable_sHmULUjwuPNK49u2XuknJw_eE4WXZMW';
- const configured=!SUPABASE_URL.includes('YOUR_')&&!SUPABASE_PUBLISHABLE_KEY.includes('YOUR_');
+ const configured=/^https:\/\/[a-z0-9-]+\.supabase\.co\/?$/i.test(SUPABASE_URL)&&/^sb_publishable_[A-Za-z0-9_-]+$/.test(SUPABASE_PUBLISHABLE_KEY);
  const EMAIL_REQUEST_COOLDOWN_MS=60_000,EMAIL_REQUEST_COOLDOWN_KEY='monolingo-signup-email-last-request';
  let lastEmailRequestAt=0;
- const client=configured&&window.supabase?.createClient?window.supabase.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY):null;
- function requireClient(){if(!client)throw new Error('Укажи Project URL и Publishable key в js/supabaseClient.js.');return client;}
- async function profileFor(userId){
+ let client=null,clientInitError=null;
+ if(configured&&window.supabase?.createClient){try{client=window.supabase.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY);}catch(error){clientInitError=error;console.error('Supabase client initialization failed:',error);}}
+ function requireClient(){if(client)return client;if(clientInitError)throw new Error('Не удалось создать клиент Supabase. Проверь Project URL в js/supabaseClient.js.');if(!configured)throw new Error('Проверь Project URL и Publishable key в js/supabaseClient.js.');if(!window.supabase?.createClient)throw new Error('Не загрузилась библиотека Supabase. Проверь подключение к CDN.');throw new Error('Клиент Supabase недоступен.');} async function profileFor(userId){
   const sb=requireClient();
   const {data:{session},error:authError}=await sb.auth.getSession();
   if(authError)throw authError;
@@ -50,7 +50,10 @@
  async function friendRequest(userId){const {data,error}=await requireClient().rpc('send_friend_request',{p_target:userId});if(error)throw error;return data;}
  async function friendRespond(requestId,accept){const {data,error}=await requireClient().rpc('respond_friend_request',{p_request:requestId,p_accept:!!accept});if(error)throw error;return data;}
  async function friendRemove(userId){const {data,error}=await requireClient().rpc('remove_friend',{p_friend:userId});if(error)throw error;return data;}
- async function friendshipStatus(userId){const {data,error}=await requireClient().rpc('friendship_status',{p_target:userId});if(error)throw error;return data?.[0]||{status:'none',sent_by_me:false};
- async function friendList(){const {data,error}=await requireClient().rpc('list_friends');if(error)throw error;return data||[];}
- async function friendRequests(){const {data,error}=await requireClient().rpc('list_friend_requests');if(error)throw error;return data||[];} window.SupabaseApp={client,configured,signUp,signIn,signOut,getCurrentUser,profileFor,refreshProfile,verifyEmailToken,resendSignupConfirmation,getSignupEmailCooldownSeconds,startGame,updateGameStats,incrementSolvedPuzzles,saveProgress,saveOpeningProgress,saveAccountData,sendReview,recordVisit,getAdminDashboard,setAdminRole,searchUsers,friendRequest,friendRespond,friendRemove,friendList,friendRequests,friendshipStatus};
+ async function friendshipStatus(userId){const {data,error}=await requireClient().rpc('friendship_status',{p_target:userId});if(error)throw error;return data?.[0]||{status:'none',sent_by_me:false};}
+ async function outgoingFriendRequests(){const {data,error}=await requireClient().rpc('list_outgoing_friend_requests');if(error)throw error;return data||[];}
+ async function cancelFriendRequest(requestId){const {data,error}=await requireClient().rpc('cancel_friend_request',{p_request:requestId});if(error)throw error;return data;}
+ async function friendActivity(){const {data,error}=await requireClient().rpc('list_friend_activity');if(error)throw error;return data||[];}
+ async function touchLastSeen(){const {data,error}=await requireClient().rpc('touch_my_last_seen');if(error)throw error;return data;} async function friendList(){const {data,error}=await requireClient().rpc('list_friends');if(error)throw error;return data||[];}
+ async function friendRequests(){const {data,error}=await requireClient().rpc('list_friend_requests');if(error)throw error;return data||[];} window.SupabaseApp={client,configured,signUp,signIn,signOut,getCurrentUser,profileFor,refreshProfile,verifyEmailToken,resendSignupConfirmation,getSignupEmailCooldownSeconds,startGame,updateGameStats,incrementSolvedPuzzles,saveProgress,saveOpeningProgress,saveAccountData,sendReview,recordVisit,getAdminDashboard,setAdminRole,searchUsers,friendRequest,friendRespond,friendRemove,friendList,friendRequests,friendshipStatus,outgoingFriendRequests,cancelFriendRequest,friendActivity,touchLastSeen};
 })();

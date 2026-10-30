@@ -190,7 +190,8 @@ html[data-theme="aristocrat"] .friends-panel label{color:#ead9bd}
 html[data-theme="aristocrat"] .friends-panel p,
 html[data-theme="aristocrat"] .friend-presence{color:#cdbb9d}
 html[data-theme="aristocrat"] .friends-panel input{
- color:#fff0d0;
+ color:#fff0d0 !important;
+ -webkit-text-fill-color:#fff0d0;
  background:linear-gradient(145deg,#1c140f,#241910);
  border:1px solid #89663c;
  border-radius:11px;
@@ -199,9 +200,9 @@ html[data-theme="aristocrat"] .friends-panel input{
  outline:none;
  transition:border-color .18s,box-shadow .18s,background .18s;
 }
-html[data-theme="aristocrat"] .friends-panel input::placeholder{color:#c0ab8c;opacity:1}
+html[data-theme="aristocrat"] .friends-panel input::placeholder{color:#cdbb9d;opacity:1}
 html[data-theme="aristocrat"] .friends-panel input:hover{border-color:#b58c58;background:linear-gradient(145deg,#241910,#2b1d13)}
-html[data-theme="aristocrat"] .friends-panel input:focus{border-color:#e0ba73;box-shadow:0 0 0 3px #d2ab6945,inset 0 2px 8px #0007}
+html[data-theme="aristocrat"] .friends-panel input:focus{color:#fff0d0 !important;-webkit-text-fill-color:#fff0d0;background:linear-gradient(145deg,#1c140f,#241910);border-color:#e0ba73;box-shadow:0 0 0 3px #d2ab6945,inset 0 2px 8px #0007}
 html[data-theme="aristocrat"] .friends-panel button{color:#f0d9b0}
 html[data-theme="aristocrat"] .friends-panel button:hover:not(:disabled){color:#fff1d2;border-color:#e1bb74;transform:translateY(-1px)}
 html[data-theme="aristocrat"] .friends-panel button:focus-visible{outline:3px solid #e4bd72;outline-offset:3px}
@@ -232,3 +233,8 @@ html[data-theme="aristocrat"] .friends-status{color:#f1d39b}
 html[data-theme="aristocrat"] .friends-dialog::backdrop{background:#080604d9;backdrop-filter:blur(5px)}
 html[data-theme="aristocrat"] .friends-section{border-top:1px solid #6d50345c;padding-top:8px}
 html[data-theme="aristocrat"] .friends-panel .small{color:#cdbb9d}
+html[data-theme="aristocrat"] .friend-request-state{color:#efcd8d;font-size:13px;white-space:nowrap}
+html[data-theme="aristocrat"] .friends-panel .friend-name{font-weight:700}
+html[data-theme="aristocrat"] .friend-presence.is-offline{color:#c0ab8c}
+html[data-theme="aristocrat"] .friends-section .friend-row:hover{background:#ffffff08}
+@media(max-width:560px){html[data-theme="aristocrat"] .friend-request-state{white-space:normal}.friends-panel .friend-row{gap:8px}}
